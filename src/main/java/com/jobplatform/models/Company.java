@@ -20,6 +20,9 @@ public class Company {
     @Column
     private String location;
 
+    @Column
+    private String images;
+
     @Column(columnDefinition = "TEXT")
     private String description;
 
