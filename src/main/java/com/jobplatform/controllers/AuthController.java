@@ -48,9 +48,18 @@ public class AuthController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @PostMapping("/request-password-reset")
-    public ResponseEntity<LoginTokenDto> requestPasswordReset(@RequestBody Map<String, String> payload) {
+    @PostMapping("/reset-password-request")
+    public ResponseEntity<LoginTokenDto> requestResetPassword(@RequestBody Map<String, String> payload) {
         String email = payload.get("email");
+        accountService.sendResetPasswordEmail(email);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<LoginTokenDto> resetPassword(@RequestBody Map<String, String> payload) {
+        String token = payload.get("token");
+        String password = payload.get("password");
+        accountService.resetPassword(token, password);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
