@@ -141,7 +141,7 @@ public class AccountService {
         helper.setSubject(subject);
 
         content = content.replace("[[name]]", user.getFullName());
-        String code = UUID.randomUUID() + System.currentTimeMillis() +"";
+        //String code = UUID.randomUUID() + System.currentTimeMillis() +"";
         String verifyURL = baseURL_Frontend + "/auth/password-reset?token=";
         content = content.replace("[[URL]]", verifyURL);
 

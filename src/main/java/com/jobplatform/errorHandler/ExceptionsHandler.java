@@ -2,6 +2,7 @@ package com.jobplatform.errorHandler;
 
 import io.jsonwebtoken.JwtException;
 import jakarta.mail.MessagingException;
+import jakarta.persistence.NonUniqueResultException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.websocket.EncodeException;
@@ -202,14 +203,13 @@ public class ExceptionsHandler {
         errors.put("error", ex.getMessage());
         return new ResponseEntity<>(errors, HttpStatus.INTERNAL_SERVER_ERROR);
     }
-
-    @ExceptionHandler(MessagingException.class)
-    public ResponseEntity<?> UnsupportedEncodingException(MessagingException ex){
+    @ExceptionHandler(NonUniqueResultException.class)
+    public ResponseEntity<?> handleNonUniqueResultException(NonUniqueResultException ex) {
         Map<String, Object> errors = new LinkedHashMap<>();
         errors.put("timestamp", LocalDateTime.now());
-        errors.put("status","Internal Server Error");
+        errors.put("status","Company name already exists.");
         errors.put("error", ex.getMessage());
-        return new ResponseEntity<>(errors, HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(errors, HttpStatus.CONFLICT);
     }
 
 }
