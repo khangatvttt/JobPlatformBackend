@@ -6,7 +6,7 @@ import jakarta.persistence.Column;
 import jakarta.validation.constraints.*;
 import java.time.LocalDateTime;
 
-public record JobDto(
+public record JobDetailDto(
         @NotNull(message = "Job title is required.")
         @Size(min = 5, max = 1000, message = "Job title must be between 5 and 1000 characters")
         String title,
@@ -19,9 +19,6 @@ public record JobDto(
 
         String benefits,
 
-//        @Column(nullable = false)
-//        @NotNull(message = "Company ID is required")
-//        Long companyId,
         Company company,
 
         @NotNull(message = "Salary is required.")
@@ -33,10 +30,6 @@ public record JobDto(
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm:ss")
         LocalDateTime deadline,
 
-        @Column(nullable = false)
-        @NotNull(message = "Creation date is required.")
-        @PastOrPresent(message = "Create date must be in the past or present")
-        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm:ss")
         LocalDateTime createAt
 
 ) {}

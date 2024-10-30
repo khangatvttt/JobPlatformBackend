@@ -73,7 +73,7 @@ public class UserAccount implements UserDetails {
     @OneToMany (mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<JobSave> jobSaves;
 
-    @OneToMany (mappedBy = "user", cascade = CascadeType.ALL)
+    @OneToMany (mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<Job> jobs;
 
     @ManyToOne

@@ -1,7 +1,6 @@
 package com.jobplatform.controllers;
 
-import com.jobplatform.models.Job;
-import com.jobplatform.models.dto.JobDto;
+import com.jobplatform.models.dto.JobDetailDto;
 import com.jobplatform.services.JobService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
@@ -23,28 +22,30 @@ public class JobController {
     }
 
     @PostMapping("")
-    public ResponseEntity<JobDto> addJob(@RequestBody JobDto jobDto){
-        JobDto addJob = jobService.addJob(jobDto);
+    public ResponseEntity<JobDetailDto> addJob(@RequestBody JobDetailDto jobDetailDto) {
+        JobDetailDto addJob = jobService.addJob(jobDetailDto);
         return new ResponseEntity<>(addJob, HttpStatus.CREATED);
     }
 
     @GetMapping("")
-    public ResponseEntity<Page<JobDto>> findAllJobs( @RequestParam(defaultValue = "0") int page, @RequestParam(required = false) Integer size) {
-        int pageSize=(size!=null)?size:10;
-        Pageable pageable= PageRequest.of(page, pageSize);
-        Page<JobDto> jobs = jobService.findAllJobs(pageable);
+    public ResponseEntity<List<JobDetailDto>> findAllJobs(@RequestParam(defaultValue = "0") int page,
+                                                          @RequestParam(defaultValue = "10") int size,
+                                                          @RequestParam(required = false) String title,
+                                                          @RequestParam(required = false) Boolean related) {
+        Pageable pageable = PageRequest.of(page, size);
+        List<JobDetailDto> jobs = jobService.findAllJobs(pageable, title, related);
         return new ResponseEntity<>(jobs, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<JobDto> findJobById(@PathVariable Long id) {
-        JobDto job = jobService.findJobById(id);
+    public ResponseEntity<JobDetailDto> findJobById(@PathVariable Long id) {
+        JobDetailDto job = jobService.findJobById(id);
         return new ResponseEntity<>(job, HttpStatus.OK);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<JobDto> updateJob(@PathVariable Long id, @Valid @RequestBody JobDto jobDto) {
-        JobDto updatedJob = jobService.updateJob(id, jobDto);
+    public ResponseEntity<JobDetailDto> updateJob(@PathVariable Long id, @Valid @RequestBody JobDetailDto jobDetailDto) {
+        JobDetailDto updatedJob = jobService.updateJob(id, jobDetailDto);
         return new ResponseEntity<>(updatedJob, HttpStatus.OK);
     }
 
@@ -53,4 +54,5 @@ public class JobController {
         jobService.deleteJob(id);
         return new ResponseEntity<>("Job deleted successfully", HttpStatus.OK);
     }
+
 }

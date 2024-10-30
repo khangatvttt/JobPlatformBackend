@@ -3,21 +3,24 @@ package com.jobplatform.services;
 import com.jobplatform.models.Company;
 import com.jobplatform.models.Job;
 import com.jobplatform.models.UserAccount;
-import com.jobplatform.models.dto.JobDto;
+import com.jobplatform.models.dto.JobDetailDto;
+import com.jobplatform.models.dto.JobMapper;
 import com.jobplatform.repositories.CompanyRepository;
 import com.jobplatform.repositories.JobRepository;
 import com.jobplatform.repositories.UserRepository;
+import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.stream.Collectors;
 
 @Service
 public class JobService {
@@ -32,83 +35,78 @@ public class JobService {
     }
 
     @Transactional
-    public JobDto addJob(JobDto jobDto){
+    public JobDetailDto addJob(JobDetailDto jobDetailDto){
         Job job=new Job();
-        Authentication authentication=SecurityContextHolder.getContext().getAuthentication();
         UserAccount userAccount = (UserAccount) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Long companyId=getCompanyIdForUser(userAccount);
 
-        job.setTitle(jobDto.title());
-        job.setDescription(jobDto.description());
-        job.setWorkExperience(jobDto.workExperience());
-        job.setBenefits(jobDto.benefits());
-        job.setSalary(jobDto.salary());
-        job.setDeadline(jobDto.deadline());
+        job.setTitle(jobDetailDto.title());
+        job.setDescription(jobDetailDto.description());
+        job.setWorkExperience(jobDetailDto.workExperience());
+        job.setBenefits(jobDetailDto.benefits());
+        job.setSalary(jobDetailDto.salary());
+        job.setDeadline(jobDetailDto.deadline());
 
         job.setCreateAt(LocalDateTime.now());
-
         job.setUser(userAccount);
 
         Job savedJob = jobRepository.save(job);
 
-        return convertToDto(savedJob);
+        return JobMapper.toJobDetailDto(savedJob);
     }
-    public Page<JobDto> findAllJobs(Pageable pageable){
-        Page<Job> jobs= jobRepository.findAll(pageable);
-        return jobs.map(this::convertToDto);
-    }
-
-    public JobDto findJobById(Long id){
-        Job job= jobRepository.findById(id).orElseThrow(()->new RuntimeException("Job not found with id:" + id));
-        return convertToDto(job);
+    public List<JobDetailDto> findAllJobs(Pageable pageable, String title, Boolean related){
+        Page<Job> jobs= jobRepository.findAll(jobFilter(title.replace('-',' '), related), pageable);
+        List<Job> jobList = jobs.getContent();
+        return jobs.getContent().stream().map(JobMapper::toJobDetailDto).toList();
     }
 
-    public JobDto updateJob(Long id, JobDto jobDto){
+    public JobDetailDto findJobById(Long id){
+        Job job= jobRepository.findById(id).orElseThrow(()->new NoSuchElementException("Job not found with id:" + id));
+        return JobMapper.toJobDetailDto(job);
+    }
+
+    public JobDetailDto updateJob(Long id, JobDetailDto jobDetailDto){
         Job job=jobRepository.findById(id).orElseThrow(()->new RuntimeException("Job not found with id:" + id));
-        job.setTitle(jobDto.title());
-        job.setDescription(jobDto.description());
-        job.setWorkExperience(jobDto.workExperience());
-        job.setBenefits(jobDto.benefits());
-        job.setSalary(jobDto.salary());
-        job.setDeadline(jobDto.deadline());
-        job.setCreateAt(LocalDateTime.now());
+        job.setTitle(jobDetailDto.title());
+        job.setDescription(jobDetailDto.description());
+        job.setWorkExperience(jobDetailDto.workExperience());
+        job.setBenefits(jobDetailDto.benefits());
+        job.setSalary(jobDetailDto.salary());
+        job.setDeadline(jobDetailDto.deadline());
 
 
         Job updatedJob=jobRepository.save(job);
-        return convertToDto(updatedJob);
+        return JobMapper.toJobDetailDto(updatedJob);
     }
 
-    @Transactional
-    private Long getCompanyIdForUser(UserAccount userAccount){
-        if(userAccount.getCompany()==null){
-            List<Company> defaultCompanies=companyRepository.findByName("Freelancer");
-
-            if(defaultCompanies.isEmpty()){
-                throw new RuntimeException("Default company 'Freelancer' not found");
-            }
-            Company defaultCompany=defaultCompanies.get(0);
-            return defaultCompany.getId();
-        }else{
-            return userAccount.getCompany().getId();
-        }
-    }
     public void deleteJob(Long id){
         if(!jobRepository.existsById(id)){
             throw new RuntimeException("Job not found with id: " +id);
         }
         jobRepository.deleteById(id);
     }
-    private JobDto convertToDto(Job job) {
-        return new JobDto(
-                job.getTitle(),
-                job.getDescription(),
-                job.getWorkExperience(),
-                job.getBenefits(),
-                job.getUser().getCompany(),
-                job.getSalary(),
-                job.getDeadline(),
-                job.getCreateAt()
-        );
+
+    public static Specification<Job> jobFilter(String title, Boolean related) {
+        related = related != null && related;
+        if (related) {
+            return (root, query, criteriaBuilder) -> {
+                if (title == null || title.isEmpty()) {
+                    return criteriaBuilder.conjunction(); // Return all jobs if no title is provided
+                }
+
+                String[] keywords = title.split(" ");
+                List<Predicate> predicates = new ArrayList<>();
+
+                for (String keyword : keywords) {
+                    predicates.add(criteriaBuilder.like(root.get("title"), "%" + keyword + "%"));
+                }
+
+                return criteriaBuilder.or(predicates.toArray(new Predicate[0]));
+            };
+        }
+        else {return (root, query, criteriaBuilder) ->
+                title == null ? null : criteriaBuilder.like(root.get("title"), "%" + title + "%");
+}
     }
+
 
 }

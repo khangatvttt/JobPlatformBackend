@@ -1,5 +1,6 @@
 package com.jobplatform.models.dto;
 
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -22,6 +23,5 @@ public record CompanyDto(
         @NotBlank(message = "Industry is required")
         String industry,
 
-        @Pattern(regexp = "^\\d+-\\d+ employees$", message = "Invalid company size format. Example: '10-50 employees'")
-        String companySize
+        Integer companySize
 ) {}
