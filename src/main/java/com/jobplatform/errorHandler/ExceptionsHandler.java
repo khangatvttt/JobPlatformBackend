@@ -2,6 +2,7 @@ package com.jobplatform.errorHandler;
 
 import io.jsonwebtoken.JwtException;
 import jakarta.mail.MessagingException;
+import jakarta.persistence.NonUniqueResultException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.websocket.EncodeException;
