@@ -1,5 +1,6 @@
 package com.jobplatform.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -44,7 +45,8 @@ public class Company {
     @Pattern(regexp = "^\\d+-\\d+ employees$", message = "Invalid company size format. Example: '10-50 employees'")
     private String companySize;
 
-    @OneToMany(mappedBy = "company", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
+    @OneToMany(mappedBy = "company", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     Set<UserAccount> users;
 }
 

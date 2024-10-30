@@ -1,5 +1,6 @@
 package com.jobplatform.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.Data;
@@ -58,19 +59,23 @@ public class UserAccount implements UserDetails {
 
     private String resetPasswordCode;
 
-    @OneToMany (mappedBy = "user", cascade = CascadeType.ALL)
+    @OneToMany (mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Set<Cv> cvs;
 
     @OneToMany (mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
     private Set<Application> applications;
 
     @OneToMany (mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
     private Set<Review> reviews;
 
     @OneToMany (mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
     private Set<JobSave> jobSaves;
 
     @OneToMany (mappedBy = "user", cascade = CascadeType.ALL)
+    @JsonIgnore
     private Set<Job> jobs;
 
     @ManyToOne
