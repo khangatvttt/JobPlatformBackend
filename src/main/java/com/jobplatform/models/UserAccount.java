@@ -8,6 +8,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
@@ -56,7 +57,9 @@ public class UserAccount implements UserDetails {
 
     private String refreshToken;
 
-    private String resetPasswordCode;
+    private String resetPasswordToken;
+
+    private LocalDateTime resetPasswordTokenExpiration;
 
     @OneToMany (mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<Cv> cvs;

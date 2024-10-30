@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.LockedException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -63,7 +64,7 @@ public class ExceptionsHandler {
     public ResponseEntity<?> handleNotFoundExceptions(NoSuchElementException ex){
         Map<String, Object> errors = new LinkedHashMap<>();
         errors.put("timestamp", LocalDateTime.now());
-        errors.put("status","Bad Request");
+        errors.put("status","Not Found");
         errors.put("error", ex.getMessage());
         return new ResponseEntity<>(errors, HttpStatus.NOT_FOUND);
     }
@@ -105,14 +106,6 @@ public class ExceptionsHandler {
         return new ResponseEntity<>(errors, HttpStatus.UNAUTHORIZED);
     }
 
-    @ExceptionHandler(LockedException.class)
-    public ResponseEntity<?> handleNotActiveAccount(LockedException ex){
-        Map<String, Object> errors = new LinkedHashMap<>();
-        errors.put("timestamp", LocalDateTime.now());
-        errors.put("status","Unauthorized");
-        errors.put("error", "This account is not activated yet");
-        return new ResponseEntity<>(errors, HttpStatus.UNAUTHORIZED);
-    }
     @ExceptionHandler(NoPermissionException.class)
     public ResponseEntity<?> handlePermission(NoPermissionException ex){
         Map<String, Object> errors = new LinkedHashMap<>();
@@ -203,14 +196,24 @@ public class ExceptionsHandler {
         return new ResponseEntity<>(errors, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    @ExceptionHandler(MessagingException.class)
-    public ResponseEntity<?> UnsupportedEncodingException(MessagingException ex){
+    @ExceptionHandler(DisabledException.class)
+    public ResponseEntity<?> DisabledException(DisabledException ex){
         Map<String, Object> errors = new LinkedHashMap<>();
         errors.put("timestamp", LocalDateTime.now());
-        errors.put("status","Internal Server Error");
-        errors.put("error", ex.getMessage());
-        return new ResponseEntity<>(errors, HttpStatus.INTERNAL_SERVER_ERROR);
+        errors.put("status","Forbidden");
+        errors.put("error", "This account hasn't been activated yet");
+        return new ResponseEntity<>(errors, HttpStatus.FORBIDDEN);
     }
+
+    @ExceptionHandler(LockedException.class)
+    public ResponseEntity<?> LockedException(LockedException ex){
+        Map<String, Object> errors = new LinkedHashMap<>();
+        errors.put("timestamp", LocalDateTime.now());
+        errors.put("status","Forbidden");
+        errors.put("error", "This account is locked");
+        return new ResponseEntity<>(errors, HttpStatus.FORBIDDEN);
+    }
+
 
 }
 

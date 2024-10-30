@@ -5,7 +5,6 @@ import com.jobplatform.models.dto.LoginDto;
 import com.jobplatform.models.dto.LoginTokenDto;
 import com.jobplatform.repositories.UserRepository;
 import io.jsonwebtoken.JwtException;
-import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.SneakyThrows;
 import org.apache.coyote.BadRequestException;
@@ -16,13 +15,13 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.io.UnsupportedEncodingException;
 import java.time.LocalDateTime;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class AccountService {
@@ -117,19 +116,14 @@ public class AccountService {
 
     @SneakyThrows
     public void sendResetPasswordEmail(String email) {
-        Optional<UserAccount> userOpt = userRepository.findByEmail(email);
-        if (userOpt.isEmpty()){
-            return;
-        }
-
-        UserAccount user = userOpt.get();
+        UserAccount user = checkUserEmail(email);
 
         String senderName = "Job Platform Website";
         String from = "JobPlatformWebsite@gmail.com";
         String subject = "Reset mật khẩu cho Job Platform Website";
         String content = "Xin chào [[name]],<br>"
-                + "Ai đó đã yêu cầu reset mật khẩu cho tài khoản Job Platform Website. Nếu đó là bạn, hãy nhấp vào link sau để xác nhận tài khoản của bạn:<br>"
-                + "<h3><a href=\"[[URL]]\" target=\"_self\">XÁC NHẬN</a></h3>"
+                + "Ai đó đã yêu cầu reset mật khẩu cho tài khoản Job Platform Website. Nếu đó là bạn, hãy nhấp vào link sau để reset mật khẩu của bạn:<br>"
+                + "<h3><a href=\"[[URL]]\" target=\"_self\">RESET MẬT KHẨU</a></h3>"
                 + "Nếu đó không phải là bạn, hãy bỏ qua mail này.<br>"
                 + "Xin cảm ơn!";
 
@@ -140,14 +134,45 @@ public class AccountService {
         helper.setTo(user.getEmail());
         helper.setSubject(subject);
 
+
+        String code = UUID.randomUUID().toString();
+        user.setResetPasswordToken(code);
+        //Set expiration 30m from now
+        user.setResetPasswordTokenExpiration(LocalDateTime.now().plusMinutes(30));
+        String resetURL = baseURL_Frontend + "/auth/password-reset?token=" + code;
+        userRepository.save(user);
+
         content = content.replace("[[name]]", user.getFullName());
-        String code = UUID.randomUUID() + System.currentTimeMillis() +"";
-        String verifyURL = baseURL_Frontend + "/auth/password-reset?token=";
-        content = content.replace("[[URL]]", verifyURL);
+        content = content.replace("[[URL]]", resetURL);
 
         helper.setText(content, true);
 
         mailSender.send(message);
+    }
+
+    @SneakyThrows
+    public void resetPassword(String token, String newPassword){
+        String passwordPattern = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{6,}$";
+        Pattern pattern = Pattern.compile(passwordPattern);
+        Matcher matcher = pattern.matcher(newPassword);
+        if (!matcher.matches()){
+            throw new BadRequestException("Password is not strong enough. Must have at least 6 characters and contains at least one uppercase, one lowercase and one number");
+        }
+
+        Optional<UserAccount> userOpt = userRepository.findByResetPasswordToken(token);
+        if (userOpt.isEmpty()){
+            throw new BadRequestException("Reset password token is invalid");
+        }
+
+        UserAccount user = userOpt.get();
+        if (user.getResetPasswordTokenExpiration().isBefore(LocalDateTime.now())){
+            throw new BadRequestException("Reset password token expired");
+        }
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        user.setResetPasswordToken(null);
+        user.setResetPasswordTokenExpiration(null);
+        userRepository.save(user);
     }
 
     @SneakyThrows
