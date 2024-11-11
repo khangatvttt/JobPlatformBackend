@@ -34,8 +34,7 @@ public class SecurityConfiguration {
         http.csrf(AbstractHttpConfigurer::disable)
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .authorizeHttpRequests(authorize -> authorize
-                .requestMatchers("/auth/**").permitAll()
-                    .requestMatchers("/jobs/**").permitAll()
+                .requestMatchers("/auth/**", "/jobs/**").permitAll()
                 .requestMatchers("/user/").hasAnyAuthority(UserAccount.Role.ROLE_ADMIN.name())
                 .anyRequest().authenticated())
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

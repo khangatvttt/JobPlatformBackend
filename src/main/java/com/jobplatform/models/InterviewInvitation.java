@@ -19,7 +19,7 @@ public class InterviewInvitation {
     @Column(nullable = false)
     private LocalDateTime createAt;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "application_id")
     private Application application;
 }

@@ -1,20 +1,21 @@
 package com.jobplatform.models.dto;
 
+import com.jobplatform.models.Cv;
 import com.jobplatform.models.Job;
+import org.mapstruct.*;
 
-public class JobMapper {
+@Mapper(componentModel = "spring")
+public interface JobMapper {
 
-    public static JobDetailDto toJobDetailDto(Job job) {
-        return new JobDetailDto(
-                job.getId(),
-                job.getTitle(),
-                job.getDescription(),
-                job.getWorkExperience(),
-                job.getBenefits(),
-                job.getUser().getCompany(),
-                job.getSalary(),
-                job.getDeadline(),
-                job.getCreateAt()
-        );
-    }
+
+    Job toEntity(JobDetailDto jobDetailDto);
+
+    @Mappings({
+            @Mapping(source = "user.company.name", target = "companyName")
+    })
+    JobDetailDto toDto(Job job);
+
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    void updateJob(JobDetailDto sourceJob, @MappingTarget Job targetJob);
+
 }
