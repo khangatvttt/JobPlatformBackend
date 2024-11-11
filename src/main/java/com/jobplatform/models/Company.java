@@ -45,7 +45,7 @@ public class Company {
     private Integer companySize;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "company", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "company", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     Set<UserAccount> users;
 }
 
