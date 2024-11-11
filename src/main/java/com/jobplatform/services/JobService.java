@@ -36,7 +36,7 @@ public class JobService {
 
     @Transactional
     public JobDetailDto addJob(JobDetailDto jobDetailDto){
-        Job job=new Job();
+        Job job = new Job();
         UserAccount userAccount = (UserAccount) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         job.setTitle(jobDetailDto.title());
@@ -54,8 +54,10 @@ public class JobService {
         return JobMapper.toJobDetailDto(savedJob);
     }
     public List<JobDetailDto> findAllJobs(Pageable pageable, String title, Boolean related){
-        Page<Job> jobs= jobRepository.findAll(jobFilter(title.replace('-',' '), related), pageable);
-        List<Job> jobList = jobs.getContent();
+        if (title!=null){
+            title = title.replace('-',' ');
+        }
+        Page<Job> jobs= jobRepository.findAll(jobFilter(title, related), pageable);
         return jobs.getContent().stream().map(JobMapper::toJobDetailDto).toList();
     }
 

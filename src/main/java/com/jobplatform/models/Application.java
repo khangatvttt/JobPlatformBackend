@@ -19,15 +19,15 @@ public class Application {
     @Column(nullable = false)
     private LocalDateTime appliedAt;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private UserAccount user;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "job_id")
     private Job job;
 
-    @OneToOne(mappedBy = "application")
+    @OneToOne(fetch = FetchType.LAZY, mappedBy = "application")
     private InterviewInvitation interviewInvitation;
 }
 

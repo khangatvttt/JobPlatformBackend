@@ -10,7 +10,7 @@ public class JobMapper {
                 job.getDescription(),
                 job.getWorkExperience(),
                 job.getBenefits(),
-                job.getUser().getCompany(),
+                job.getUser().getCompany().getName(),
                 job.getSalary(),
                 job.getDeadline(),
                 job.getCreateAt()

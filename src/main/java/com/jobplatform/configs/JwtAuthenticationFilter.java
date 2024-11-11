@@ -42,7 +42,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     ) throws ServletException, IOException {
 
         //Not filter the /auth endpoint
-        if (request.getRequestURI().startsWith("/auth")) {
+        if (request.getRequestURI().startsWith("/auth") || request.getRequestURI().startsWith("/jobs")) {
             filterChain.doFilter(request, response);
             return;
         }

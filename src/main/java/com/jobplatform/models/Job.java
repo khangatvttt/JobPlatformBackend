@@ -26,11 +26,13 @@ public class Job {
     @Size(min = 20, message = "Job description must be at least 20 characters.")
     private String description;
 
-    @Column
+    @Column(columnDefinition = "Text")
     private String workExperience;
 
-    @Column
+    @Column(columnDefinition = "Text")
     private String benefits;
+
+    private String industry;
 
     @Column(nullable = false)
     @NotNull(message = "Salary is required.")
@@ -57,7 +59,7 @@ public class Job {
     @OneToMany (mappedBy = "job", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<JobSave> jobSaves;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn (name = "user_id")
     @NotNull(message = "User account is required.")
     private UserAccount user;
