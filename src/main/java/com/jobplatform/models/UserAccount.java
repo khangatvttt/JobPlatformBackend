@@ -58,7 +58,7 @@ public class UserAccount implements UserDetails {
 
     private String refreshToken;
 
-    private String resetPasswordCode;
+    private String resetPasswordToken;
 
     private LocalDateTime resetPasswordTokenExpiration;
 

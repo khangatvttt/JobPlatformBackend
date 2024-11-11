@@ -19,12 +19,16 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
+    private final List<WhitelistEntry> whitelist = new ArrayList<>();
+
 
     public JwtAuthenticationFilter(
             JwtService jwtService,
@@ -32,6 +36,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     ) {
         this.jwtService = jwtService;
         this.userDetailsService = userDetailsService;
+
+        // Endpoint that no need filtered
+        whitelist.add(new WhitelistEntry("/auth", null));          // Allow all methods for /auth
+        whitelist.add(new WhitelistEntry("/jobs", "GET"));
     }
 
     @Override
@@ -42,7 +50,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     ) throws ServletException, IOException {
 
         //Not filter the /auth endpoint
-        if (request.getRequestURI().startsWith("/auth") || request.getRequestURI().startsWith("/jobs")) {
+        if (isWhitelisted(request)) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -93,5 +101,29 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
         filterChain.doFilter(request, response);
 
+    }
+
+    private boolean isWhitelisted(HttpServletRequest request) {
+        String uri = request.getRequestURI();
+        String method = request.getMethod();
+
+        return whitelist.stream()
+                .anyMatch(entry -> entry.matches(uri, method));
+    }
+
+
+    private static class WhitelistEntry {
+        private final String pathPrefix;
+        private final String allowedMethod;
+
+        public WhitelistEntry(String pathPrefix, String allowedMethod) {
+            this.pathPrefix = pathPrefix;
+            this.allowedMethod = allowedMethod;
+        }
+
+        public boolean matches(String uri, String method) {
+            // Check if URI starts with the whitelist path and method matches (or is null for any method)
+            return uri.startsWith(pathPrefix) && (allowedMethod == null || allowedMethod.equalsIgnoreCase(method));
+        }
     }
 }

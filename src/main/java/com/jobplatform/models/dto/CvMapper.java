@@ -13,5 +13,5 @@ public interface CvMapper {
 
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    void updateCvFromEntity(CvDto sourceCv, @MappingTarget Cv targetCv);
+    void updateCv(CvDto sourceCv, @MappingTarget Cv targetCv);
 }

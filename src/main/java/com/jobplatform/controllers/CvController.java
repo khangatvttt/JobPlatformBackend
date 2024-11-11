@@ -5,6 +5,8 @@ import com.jobplatform.models.dto.CvDto;
 import com.jobplatform.services.CvService;
 import com.jobplatform.services.FirebaseService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
@@ -32,9 +34,20 @@ public class CvController {
     }
 
     @GetMapping("")
-    public ResponseEntity<List<Cv>> getCvs(@RequestParam(required = false) String userId) {
-        List<Cv> listCv = cvService.getCvs(userId);
-        return new ResponseEntity<>(listCv, HttpStatus.OK);
+    public ResponseEntity<List<Cv>> getCvs(@RequestParam(required = false) Long userId,
+                                           @RequestParam(defaultValue = "0") Integer page,
+                                           @RequestParam(defaultValue = "10") Integer size) {
+        Page<Cv> listPageCv = cvService.getCvs(userId, page, size);
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("X-Total-Pages", String.valueOf(listPageCv.getTotalPages()));
+        headers.add("X-Total-Elements", String.valueOf(listPageCv.getTotalElements()));
+        return new ResponseEntity<>(listPageCv.getContent(), headers, HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Cv> getCv(@PathVariable Long id) {
+        Cv cv = cvService.getCv(id);
+        return new ResponseEntity<>(cv, HttpStatus.OK);
     }
 
     @PatchMapping("/{id}")
@@ -49,13 +62,25 @@ public class CvController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @PostMapping("/upload")
-    public String uploadCv(@RequestParam("file") MultipartFile multipartFile) {
-        try {
-            return firebaseService.upload(multipartFile);
-        }
-        catch (Error error){
-            return "Fail";
+    @PostMapping("/file")
+    public ResponseEntity<String> uploadCv(@RequestParam("file") MultipartFile multipartFile) {
+        String fileLink = firebaseService.upload(multipartFile);
+        return new ResponseEntity<>(fileLink, HttpStatus.OK);
+    }
+
+    @GetMapping("/file")
+    public ResponseEntity<List<String>> getCvFiles(@RequestParam Long userId) {
+        List<String> fileLink = firebaseService.getFilesByUserId(userId);
+        return new ResponseEntity<>(fileLink, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/file/{id}")
+    public ResponseEntity<String> deleteCvFile(@PathVariable String fileId) {
+        boolean success = firebaseService.deleteFile(fileId);
+        if (success) {
+            return new ResponseEntity<>(HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }
