@@ -35,6 +35,7 @@ public class SecurityConfiguration {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .authorizeHttpRequests(authorize -> authorize
                 .requestMatchers("/auth/**").permitAll()
+                    .requestMatchers("/jobs/**").permitAll()
                 .requestMatchers("/user/").hasAnyAuthority(UserAccount.Role.ROLE_ADMIN.name())
                 .anyRequest().authenticated())
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

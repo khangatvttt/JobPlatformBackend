@@ -7,6 +7,9 @@ import jakarta.validation.constraints.*;
 import java.time.LocalDateTime;
 
 public record JobDetailDto(
+
+        Long id,
+
         @NotNull(message = "Job title is required.")
         @Size(min = 5, max = 1000, message = "Job title must be between 5 and 1000 characters")
         String title,

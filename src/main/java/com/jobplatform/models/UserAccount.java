@@ -60,6 +60,10 @@ public class UserAccount implements UserDetails {
 
     private String resetPasswordCode;
 
+    private String resetPasswordToken;
+
+    private LocalDateTime resetPasswordTokenExpiration;
+
     @OneToMany (mappedBy = "user", cascade = CascadeType.ALL)
     private Set<Cv> cvs;
 

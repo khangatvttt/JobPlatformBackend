@@ -54,7 +54,10 @@ public class JobService {
         return JobMapper.toJobDetailDto(savedJob);
     }
     public List<JobDetailDto> findAllJobs(Pageable pageable, String title, Boolean related){
-        Page<Job> jobs= jobRepository.findAll(jobFilter(title.replace('-',' '), related), pageable);
+        if (title!=null){
+            title = title.replace('-',' ');
+        }
+        Page<Job> jobs= jobRepository.findAll(jobFilter(title, related), pageable);
         List<Job> jobList = jobs.getContent();
         return jobs.getContent().stream().map(JobMapper::toJobDetailDto).toList();
     }

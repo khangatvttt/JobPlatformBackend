@@ -6,6 +6,7 @@ public class JobMapper {
 
     public static JobDetailDto toJobDetailDto(Job job) {
         return new JobDetailDto(
+                job.getId(),
                 job.getTitle(),
                 job.getDescription(),
                 job.getWorkExperience(),
