@@ -231,6 +231,7 @@ public class ExceptionsHandler {
         errors.put("timestamp", LocalDateTime.now());
         errors.put("status", "Error");
         errors.put("error", ex.getMessage());
+        System.out.print(ex);
         return new ResponseEntity<>(errors, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 

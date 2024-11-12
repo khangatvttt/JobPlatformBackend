@@ -33,16 +33,9 @@ public class FirebaseService {
     @Value("${firebase.bucket}")
     private String firebaseBucket;
 
-    private String uploadFileToFirebase(InputStream inputStream, String fileName) throws IOException {
+    private String uploadFileToFirebase(InputStream inputStream, String fileName, String fileType) throws IOException {
         BlobId blobId = BlobId.of(firebaseBucket, fileName);
-        String contentType;
-        if (getExtension(fileName).equals("pdf")){
-            contentType = "application/pdf";
-        }
-        else {
-            contentType = "application/msword";
-        }
-        BlobInfo blobInfo = BlobInfo.newBuilder(blobId).setContentType(contentType).build();
+        BlobInfo blobInfo = BlobInfo.newBuilder(blobId).setContentType(fileType).build();
 
         InputStream credentialsStream = FirebaseService.class.getClassLoader().getResourceAsStream("firebase-key.json");
         Credentials credentials = GoogleCredentials.fromStream(credentialsStream);
@@ -71,7 +64,7 @@ public class FirebaseService {
         fileName = userAccount.getId()+"/"+fileName;
         String URL;
         try (InputStream inputStream = multipartFile.getInputStream()) {
-            URL = this.uploadFileToFirebase(inputStream, fileName);
+            URL = this.uploadFileToFirebase(inputStream, fileName, fileType);
         }
 
         return URL;
