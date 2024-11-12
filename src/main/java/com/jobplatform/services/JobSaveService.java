@@ -27,7 +27,7 @@ public class JobSaveService {
         UserAccount userAccount = (UserAccount) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         Job job= jobRepository.findById(jobId)
-                .orElseThrow(()-> new NoSuchElementException("Job not found"));
+                .orElseThrow(()-> new NoSuchElementException("Job with id "+jobId+" is not found"));
         JobSave jobSave=new JobSave();
         jobSave.setUser(userAccount);
         jobSave.setJob(job);
@@ -38,10 +38,10 @@ public class JobSaveService {
     public void deleteJobSave(Long jobId){
         UserAccount userAccount = (UserAccount) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Job job = jobRepository.findById(jobId)
-                .orElseThrow(() -> new NoSuchElementException("Job not found"));
+                .orElseThrow(() -> new NoSuchElementException("Job with id "+jobId+" is not found"));
 
         JobSave jobSave = jobSaveRepository.findByUserAndJob(userAccount, job)
-                .orElseThrow(() -> new NoSuchElementException("JobSave not found for this user and job"));
+                .orElseThrow(() -> new NoSuchElementException("User with id "+userAccount.getId()+" hasn't saved Job with id "+jobId+" yet"));
 
         jobSaveRepository.delete(jobSave);
     }

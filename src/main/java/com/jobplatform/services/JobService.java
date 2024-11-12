@@ -53,11 +53,14 @@ public class JobService {
     }
 
     // Get all jobs
-    public Page<Job> findAllJobs(Pageable pageable, String title, Boolean related) {
+    public Page<Job> findAllJobs(Pageable pageable, String title, Boolean related, String status) {
+        // Check the status
+        Job.Status.valueOf(status);
+        // Check the title
         if (title != null) {
             title = title.replace('-', ' ');
         }
-        return jobRepository.findAll(jobFilter(title, related), pageable);
+        return jobRepository.findAll(jobFilter(title, related, status), pageable);
     }
 
     // Get a job by Id
@@ -84,27 +87,31 @@ public class JobService {
     }
 
     // Search job function
-    public static Specification<Job> jobFilter(String title, Boolean related) {
-        related = related != null && related;
-        if (related) {
-            return (root, query, criteriaBuilder) -> {
-                if (title == null || title.isEmpty()) {
-                    return criteriaBuilder.conjunction(); // Return all jobs if no title is provided
+    public static Specification<Job> jobFilter(String title, Boolean related, String status) {
+        return (root, query, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            // Title filter
+            if (title != null && !title.isEmpty()) {
+                if (related) {
+                    String[] keywords = title.split(" ");
+                    List<Predicate> keywordPredicates = new ArrayList<>();
+                    for (String keyword : keywords) {
+                        keywordPredicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("title")), "%" + keyword.toLowerCase() + "%"));
+                    }
+                    predicates.add(criteriaBuilder.or(keywordPredicates.toArray(new Predicate[0])));
+                } else {
+                    predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("title")), "%" + title.toLowerCase() + "%"));
                 }
+            }
 
-                String[] keywords = title.split(" ");
-                List<Predicate> predicates = new ArrayList<>();
+            // Status filter
+            if (status != null && !status.isEmpty()) {
+                predicates.add(criteriaBuilder.equal(root.get("status"), status));
+            }
 
-                for (String keyword : keywords) {
-                    predicates.add(criteriaBuilder.like(root.get("title"), "%" + keyword + "%"));
-                }
-
-                return criteriaBuilder.or(predicates.toArray(new Predicate[0]));
-            };
-        } else {
-            return (root, query, criteriaBuilder) ->
-                    title == null ? null : criteriaBuilder.like(root.get("title"), "%" + title + "%");
-        }
+            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+        };
     }
 
 

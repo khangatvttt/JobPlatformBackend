@@ -12,6 +12,13 @@ import java.util.Set;
 @Data
 public class Job {
 
+    public enum Status{
+        PENDING_APPROVAL,
+        SHOW,
+        HIDE,
+        DISQUALIFIED
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -45,10 +52,11 @@ public class Job {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm:ss")
     private LocalDateTime deadline;
 
-    @Column(nullable = false)
-    @NotNull(message = "Creation date is required.")
-    @PastOrPresent(message = "Create date must be in the past or present")
     private LocalDateTime createAt;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private Status status;
 
     @OneToMany (mappedBy = "job", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<Application> applications;

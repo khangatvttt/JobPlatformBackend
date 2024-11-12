@@ -40,9 +40,10 @@ public class JobController {
     public ResponseEntity<List<JobDetailDto>> findAllJobs(@RequestParam(defaultValue = "0") int page,
                                                           @RequestParam(defaultValue = "10") int size,
                                                           @RequestParam(required = false) String title,
-                                                          @RequestParam(required = false) Boolean related) {
+                                                          @RequestParam(required = false) Boolean related,
+                                                          @RequestParam(required = false) String status) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<Job> jobs = jobService.findAllJobs(pageable, title, related);
+        Page<Job> jobs = jobService.findAllJobs(pageable, title, related, status);
         List<JobDetailDto> listJobs = jobs.getContent().stream().map(jobMapper::toDto).toList();
 
         HttpHeaders headers = new HttpHeaders();
