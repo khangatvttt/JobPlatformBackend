@@ -1,5 +1,6 @@
 package com.jobplatform.services;
 
+import com.jobplatform.models.UserAccount;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -45,11 +46,12 @@ public class JwtService {
         return extractAllClaims(token);
     }
 
-    public String generateToken(JwtService.TokenType tokenType, UserDetails userDetails) {
+    public String generateToken(JwtService.TokenType tokenType, UserAccount user) {
         return  Jwts
                 .builder()
                 .claim("token_type",tokenType)
-                .subject(userDetails.getUsername())
+                .claim("role",user.getRole())
+                .subject(user.getUsername())
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + jwtExpiration))
                 .signWith(getSignInKey())

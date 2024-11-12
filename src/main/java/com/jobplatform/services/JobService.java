@@ -55,7 +55,8 @@ public class JobService {
     // Get all jobs
     public Page<Job> findAllJobs(Pageable pageable, String title, Boolean related, String status) {
         // Check the status
-        Job.Status.valueOf(status);
+        if (status!=null)
+            Job.Status.valueOf(status);
         // Check the title
         if (title != null) {
             title = title.replace('-', ' ');
