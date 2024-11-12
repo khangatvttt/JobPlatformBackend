@@ -3,6 +3,7 @@ package com.jobplatform.controllers;
 import com.jobplatform.models.UserAccount;
 import com.jobplatform.models.dto.LoginDto;
 import com.jobplatform.models.dto.LoginTokenDto;
+import com.jobplatform.models.dto.UserDto;
 import com.jobplatform.services.AccountService;
 import com.jobplatform.services.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,7 +25,7 @@ public class AuthController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<Void> register(HttpServletRequest request,@Valid @RequestBody UserAccount user) {
+    public ResponseEntity<Void> register(HttpServletRequest request,@Valid @RequestBody UserDto user) {
         accountService.signUp(user, getBaseURL(request));
         return new ResponseEntity<>(HttpStatus.OK);
     }

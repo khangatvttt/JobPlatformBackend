@@ -3,6 +3,8 @@ package com.jobplatform.services;
 import com.jobplatform.models.UserAccount;
 import com.jobplatform.models.dto.LoginDto;
 import com.jobplatform.models.dto.LoginTokenDto;
+import com.jobplatform.models.dto.UserDto;
+import com.jobplatform.models.dto.UserMapper;
 import com.jobplatform.repositories.UserRepository;
 import io.jsonwebtoken.JwtException;
 import jakarta.mail.internet.MimeMessage;
@@ -30,23 +32,25 @@ public class AccountService {
     private final JwtService jwtService;
     private final JavaMailSender mailSender;
     private final PasswordEncoder passwordEncoder;
+    private final UserMapper userMapper;
     private final String baseURL_Frontend = "http://localhost:3000";
 
     public AccountService(UserRepository userRepository,
                           AuthenticationManager authenticationManager,
                           JwtService jwtService,
                           JavaMailSender mailSender,
-                          PasswordEncoder passwordEncoder) {
+                          PasswordEncoder passwordEncoder, UserMapper userMapper) {
         this.userRepository = userRepository;
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
         this.passwordEncoder = passwordEncoder;
         this.mailSender = mailSender;
+        this.userMapper = userMapper;
     }
 
     @SneakyThrows
-    public void signUp(UserAccount userAccount, String baseUrl){
-        Optional<UserAccount> userOpt = userRepository.findByEmail(userAccount.getEmail());
+    public void signUp(UserDto userDto, String baseUrl){
+        Optional<UserAccount> userOpt = userRepository.findByEmail(userDto.email());
         if (userOpt.isPresent()) {
             // This email has been used to activate account
             if (userOpt.get().getIsActive()) {
@@ -57,9 +61,17 @@ public class AccountService {
                 userRepository.delete(userOpt.get());
             }
         }
+
+        UserAccount userAccount = userMapper.toEntity(userDto);
+
         userAccount.setIsNonLocked(true);
         userAccount.setIsActive(false);
         userAccount.setPassword(passwordEncoder.encode(userAccount.getPassword()));
+
+        if (userAccount.getRole() == UserAccount.Role.ROLE_ADMIN){
+            userAccount.setIsNonLocked(false);
+        }
+
         sendVerifyMail(userAccount, baseUrl);
         userRepository.save(userAccount);
 

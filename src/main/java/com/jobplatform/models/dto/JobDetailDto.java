@@ -24,6 +24,10 @@ public record JobDetailDto(
 
         String companyName,
 
+        String companyImages,
+
+        String companyLocation,
+
         @NotNull(message = "Salary is required.")
         @Min(value = 0, message = "Salary must be positive.")
         Double salary,

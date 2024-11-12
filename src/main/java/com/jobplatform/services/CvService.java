@@ -30,6 +30,8 @@ public class CvService {
     public Cv createCv(Cv cv) {
         // Get current logging user
         UserAccount userAccount = (UserAccount) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        cv.setId(null);
         cv.setUser(userAccount);
         cv.setCreatedAt(LocalDateTime.now());
         return cvRepository.save(cv);

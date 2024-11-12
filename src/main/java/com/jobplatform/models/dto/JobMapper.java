@@ -1,6 +1,5 @@
 package com.jobplatform.models.dto;
 
-import com.jobplatform.models.Cv;
 import com.jobplatform.models.Job;
 import org.mapstruct.*;
 
@@ -11,7 +10,9 @@ public interface JobMapper {
     Job toEntity(JobDetailDto jobDetailDto);
 
     @Mappings({
-            @Mapping(source = "user.company.name", target = "companyName")
+            @Mapping(source = "user.company.name", target = "companyName"),
+            @Mapping(source = "user.company.images", target = "companyImages"),
+            @Mapping(source = "user.company.location", target = "companyLocation")
     })
     JobDetailDto toDto(Job job);
 

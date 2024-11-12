@@ -27,16 +27,11 @@ public class CompanyController {
     }
 
     @GetMapping("")
-    public ResponseEntity<List<Company>> findAllCompanies(){
-        List<Company> companies= companyService.findAllCompanies();
+    public ResponseEntity<List<CompanyDto>> findAllCompanies(@RequestParam(required = false) String companyName){
+        List<CompanyDto> companies= companyService.findAllCompanies(companyName);
         return new ResponseEntity<>(companies, HttpStatus.OK);
     }
 
-    @GetMapping("/{name}")
-    public ResponseEntity<List<Company>> findCompanyByName(@PathVariable String name){
-        List<Company> companies = companyService.findCompanyByName(name);
-        return new ResponseEntity<>(companies, HttpStatus.OK);
-    }
 
     @GetMapping("/id/{id}")
     public ResponseEntity<CompanyDto> findCompanyById(@PathVariable Long id){
@@ -50,7 +45,7 @@ public class CompanyController {
         return new ResponseEntity<>("Company deleted successfully", HttpStatus.OK);
     }
 
-    @PutMapping("/{id}")
+    @PatchMapping("/{id}")
     public ResponseEntity<CompanyDto> updateCompany(@PathVariable Long id, @Valid @RequestBody CompanyDto companyDto) {
         CompanyDto updatedCompany = companyService.updateCompany(id, companyDto);
         return new ResponseEntity<>(updatedCompany, HttpStatus.OK);
