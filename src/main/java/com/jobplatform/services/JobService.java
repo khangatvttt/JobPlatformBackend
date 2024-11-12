@@ -8,6 +8,7 @@ import com.jobplatform.models.dto.JobMapper;
 import com.jobplatform.repositories.CompanyRepository;
 import com.jobplatform.repositories.JobRepository;
 import com.jobplatform.repositories.UserRepository;
+import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
 import lombok.SneakyThrows;
 import org.springframework.data.domain.Page;
@@ -46,6 +47,7 @@ public class JobService {
 
         job.setCreateAt(LocalDateTime.now());
         job.setUser(userAccount);
+        job.setStatus(Job.Status.PENDING_APPROVAL);
 
         Job savedJob = jobRepository.save(job);
 
@@ -53,15 +55,16 @@ public class JobService {
     }
 
     // Get all jobs
-    public Page<Job> findAllJobs(Pageable pageable, String title, Boolean related, String status) {
+    public Page<Job> findAllJobs(Pageable pageable, String title, Boolean related, String status, Long userId) {
         // Check the status
-        if (status!=null)
+        if (status!=null) {
             Job.Status.valueOf(status);
+        }
         // Check the title
         if (title != null) {
             title = title.replace('-', ' ');
         }
-        return jobRepository.findAll(jobFilter(title, related, status), pageable);
+        return jobRepository.findAll(jobFilter(title, related, status, userId), pageable);
     }
 
     // Get a job by Id
@@ -88,7 +91,7 @@ public class JobService {
     }
 
     // Search job function
-    public static Specification<Job> jobFilter(String title, Boolean related, String status) {
+    public static Specification<Job> jobFilter(String title, Boolean related, String status, Long userId) {
         return (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
 
@@ -109,6 +112,11 @@ public class JobService {
             // Status filter
             if (status != null && !status.isEmpty()) {
                 predicates.add(criteriaBuilder.equal(root.get("status"), status));
+            }
+
+            if (userId != null) {
+                Join<Job, UserAccount> userJoin = root.join("user");
+                predicates.add(criteriaBuilder.equal(userJoin.get("id"), userId));
             }
 
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
