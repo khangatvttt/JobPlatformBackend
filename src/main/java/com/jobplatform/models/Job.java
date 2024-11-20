@@ -49,7 +49,6 @@ public class Job {
     @Column(nullable = false)
     @NotNull(message = "Application deadline is required.")
     @Future(message = "Deadline must be a future date.")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm:ss")
     private LocalDateTime deadline;
 
     private LocalDateTime createAt;

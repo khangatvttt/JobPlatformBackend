@@ -50,7 +50,7 @@ public class JwtService {
         return  Jwts
                 .builder()
                 .claim("token_type",tokenType)
-                .claim("role",user.getRole())
+                .claim("role", user.getRole())
                 .subject(user.getUsername())
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + jwtExpiration))

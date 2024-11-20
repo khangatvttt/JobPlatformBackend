@@ -14,5 +14,9 @@ public record CvDto(
         String education,
         String workExperience,
         String skills,
-        String certifications
+        String certifications,
+        String imageCV,
+        String languageSkill,
+        String hobby,
+        String portfolio
 ) {}

@@ -1,10 +1,12 @@
 package com.jobplatform.services;
 
+import com.jobplatform.models.Company;
 import com.jobplatform.models.UserAccount;
 import com.jobplatform.models.dto.LoginDto;
 import com.jobplatform.models.dto.LoginTokenDto;
 import com.jobplatform.models.dto.UserDto;
 import com.jobplatform.models.dto.UserMapper;
+import com.jobplatform.repositories.CompanyRepository;
 import com.jobplatform.repositories.UserRepository;
 import io.jsonwebtoken.JwtException;
 import jakarta.mail.internet.MimeMessage;
@@ -33,19 +35,21 @@ public class AccountService {
     private final JavaMailSender mailSender;
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
+    private final CompanyRepository companyRepository;
     private final String baseURL_Frontend = "http://localhost:3000";
 
     public AccountService(UserRepository userRepository,
                           AuthenticationManager authenticationManager,
                           JwtService jwtService,
                           JavaMailSender mailSender,
-                          PasswordEncoder passwordEncoder, UserMapper userMapper) {
+                          PasswordEncoder passwordEncoder, UserMapper userMapper, CompanyRepository companyRepository) {
         this.userRepository = userRepository;
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
         this.passwordEncoder = passwordEncoder;
         this.mailSender = mailSender;
         this.userMapper = userMapper;
+        this.companyRepository = companyRepository;
     }
 
     @SneakyThrows
@@ -64,12 +68,22 @@ public class AccountService {
 
         UserAccount userAccount = userMapper.toEntity(userDto);
 
+
         userAccount.setIsNonLocked(true);
         userAccount.setIsActive(false);
         userAccount.setPassword(passwordEncoder.encode(userAccount.getPassword()));
 
-        if (userAccount.getRole() == UserAccount.Role.ROLE_ADMIN){
+
+
+        if (userAccount.getRole() == UserAccount.Role.ROLE_ADMIN ||
+                userAccount.getRole() == UserAccount.Role.ROLE_RECRUITER){
             userAccount.setIsNonLocked(false);
+        }
+
+        if (userAccount.getRole() == UserAccount.Role.ROLE_RECRUITER){
+            Company company = companyRepository.findById(userDto.companyId())
+                    .orElseThrow(()->new NoSuchElementException("Company with id "+ userDto.companyId()+ " is not found"));
+            userAccount.setCompany(company);
         }
 
         sendVerifyMail(userAccount, baseUrl);

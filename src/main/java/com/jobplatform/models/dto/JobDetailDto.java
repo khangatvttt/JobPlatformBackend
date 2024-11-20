@@ -28,13 +28,14 @@ public record JobDetailDto(
 
         String companyLocation,
 
+        String industry,
+
         @NotNull(message = "Salary is required.")
         @Min(value = 0, message = "Salary must be positive.")
         Double salary,
 
         @NotNull(message = "Application deadline is required.")
         @Future(message = "Deadline must be a future date.")
-        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm:ss")
         LocalDateTime deadline,
 
         LocalDateTime createAt

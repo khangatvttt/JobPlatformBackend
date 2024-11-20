@@ -1,10 +1,12 @@
 package com.jobplatform.services;
 
 import com.jobplatform.models.Company;
+import com.jobplatform.models.UserAccount;
 import com.jobplatform.models.dto.CompanyDto;
 import com.jobplatform.models.dto.CompanyMapper;
 import com.jobplatform.repositories.CompanyRepository;
 import jakarta.persistence.NonUniqueResultException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,9 +23,16 @@ public class CompanyService {
     }
 
     public CompanyDto addCompany(CompanyDto companyDto) {
+        UserAccount userAccount = (UserAccount) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         Company company = companyMapper.toEntity(companyDto);
 
+        if (userAccount.getRole()!= UserAccount.Role.ROLE_ADMIN){
+            company.setStatus(false);
+        }
+        else {
+            company.setStatus(true);
+        }
         Company savedCompany = companyRepository.save(company);
         return companyMapper.toDto(savedCompany);
     }
