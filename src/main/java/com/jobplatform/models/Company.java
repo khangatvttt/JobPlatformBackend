@@ -44,6 +44,8 @@ public class Company {
     @Column
     private Integer companySize;
 
+    private Boolean status;
+
     @JsonIgnore
     @OneToMany(mappedBy = "company", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     Set<UserAccount> users;

@@ -12,7 +12,7 @@ public interface UserMapper {
     UserDto toDto(UserAccount user);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    @Mapping(target = "email", ignore = true)  // Ignore email field
+    @Mapping(target = "email", ignore = true)
     @Mapping(target = "role", ignore = true)
     void updateUser(UserDto sourceUser, @MappingTarget UserAccount targetUser);
 

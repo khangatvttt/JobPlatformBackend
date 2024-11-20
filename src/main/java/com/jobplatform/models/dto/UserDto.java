@@ -4,10 +4,7 @@ import com.jobplatform.models.UserAccount;
 import jakarta.persistence.Column;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 
 public record UserDto(
         @NotBlank
@@ -28,7 +25,9 @@ public record UserDto(
         @Pattern(regexp = "^\\d{10}$", message = "Phone number must be exactly 10 digits")
         String phone,
 
-        @NotBlank
+        Long companyId,
+
+        @NotNull
         @Enumerated(EnumType.STRING)
         UserAccount.Role role
         ) {

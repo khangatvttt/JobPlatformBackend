@@ -6,6 +6,8 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.Data;
+
+import javax.imageio.ImageIO;
 import java.time.LocalDateTime;
 
 @Entity
@@ -51,6 +53,14 @@ public class Cv {
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
+
+    private String imageCV;
+
+    private String languageSkill;
+
+    private String hobby;
+
+    private String portfolio;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn (name = "user_id")
