@@ -1,6 +1,5 @@
 package com.jobplatform.models;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.Data;
@@ -61,6 +60,8 @@ public class UserAccount implements UserDetails {
     private String resetPasswordToken;
 
     private LocalDateTime resetPasswordTokenExpiration;
+
+    private String businessLicense;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private Set<Cv> cvs;

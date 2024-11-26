@@ -1,8 +1,6 @@
 package com.jobplatform.models.dto;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.jobplatform.models.Company;
-import jakarta.persistence.Column;
+import com.jobplatform.models.Job;
 import jakarta.validation.constraints.*;
 import java.time.LocalDateTime;
 
@@ -33,6 +31,8 @@ public record JobDetailDto(
         @NotNull(message = "Salary is required.")
         @Min(value = 0, message = "Salary must be positive.")
         Double salary,
+
+        Job.Status status,
 
         @NotNull(message = "Application deadline is required.")
         @Future(message = "Deadline must be a future date.")

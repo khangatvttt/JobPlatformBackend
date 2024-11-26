@@ -27,6 +27,12 @@ public record UserDto(
 
         Long companyId,
 
+        String companyName,
+
+        Boolean isActive,
+
+        Boolean isNonLocked,
+
         @NotNull
         @Enumerated(EnumType.STRING)
         UserAccount.Role role

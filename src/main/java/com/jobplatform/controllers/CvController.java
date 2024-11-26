@@ -61,26 +61,4 @@ public class CvController {
         cvService.deleteCv(id);
         return new ResponseEntity<>(HttpStatus.OK);
     }
-
-    @PostMapping("/file")
-    public ResponseEntity<String> uploadCv(@RequestParam("file") MultipartFile multipartFile) {
-        String fileLink = firebaseService.upload(multipartFile);
-        return new ResponseEntity<>(fileLink, HttpStatus.OK);
-    }
-
-    @GetMapping("/file")
-    public ResponseEntity<List<String>> getCvFiles(@RequestParam Long userId) {
-        List<String> fileLink = firebaseService.getFilesByUserId(userId);
-        return new ResponseEntity<>(fileLink, HttpStatus.OK);
-    }
-
-    @DeleteMapping("/file/{id}")
-    public ResponseEntity<String> deleteCvFile(@PathVariable String fileId) {
-        boolean success = firebaseService.deleteFile(fileId);
-        if (success) {
-            return new ResponseEntity<>(HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
 }

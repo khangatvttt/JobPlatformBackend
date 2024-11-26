@@ -5,6 +5,11 @@ import com.jobplatform.models.dto.UserDto;
 import com.jobplatform.models.dto.UserMapper;
 import com.jobplatform.repositories.UserRepository;
 import lombok.SneakyThrows;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -25,10 +30,16 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
     }
     
-    public List<UserDto> findAllUsers() {
-        return userRepository.findAll().stream()
-                .map(userMapper::toDto)
-                .toList();
+    public Page<UserAccount> findAllUsers(int page, int size, String role, String email) {
+        Pageable pageable = PageRequest.of(page, size);
+        UserAccount.Role roleUser;
+        if (role==null) {
+            roleUser = null;
+        }
+        else {
+            roleUser = UserAccount.Role.valueOf(role);
+        }
+        return userRepository.findAll(filterUsers(roleUser, email), pageable);
     }
 
     public UserDto findUserById(Long id) {
@@ -64,5 +75,19 @@ public class UserService {
         if (userAccount.getRole()!= UserAccount.Role.ROLE_ADMIN && !userAccount.getId().equals(resourceOwnerId)){
             throw new NoPermissionException();
         }
+    }
+
+    public static Specification<UserAccount> filterUsers(UserAccount.Role role, String email) {
+        return (root, query, criteriaBuilder) -> {
+            var predicate = criteriaBuilder.conjunction();
+
+            if (role != null) {
+                predicate = criteriaBuilder.and(predicate, criteriaBuilder.equal(root.get("role"), role));
+            }
+            if (email != null && !email.isEmpty()) {
+                predicate = criteriaBuilder.and(predicate, criteriaBuilder.like(criteriaBuilder.lower(root.get("email")), "%" + email.toLowerCase() + "%"));
+            }
+            return predicate;
+        };
     }
 }
