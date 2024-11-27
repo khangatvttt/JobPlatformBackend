@@ -1,6 +1,7 @@
 package com.jobplatform.models;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.Data;
@@ -57,15 +58,19 @@ public class Job {
     @Enumerated(EnumType.STRING)
     private Status status;
 
+    @JsonIgnore
     @OneToMany (mappedBy = "job", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<Application> applications;
 
+    @JsonIgnore
     @OneToMany (mappedBy = "job", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<Review> reviews;
 
+    @JsonIgnore
     @OneToMany (mappedBy = "job", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<JobSave> jobSaves;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn (name = "user_id")
     @NotNull(message = "User account is required.")
