@@ -33,6 +33,7 @@ public class ApplicationController {
                                                                  @RequestParam(required = false) String email,
                                                                  @RequestParam(required = false) String phone,
                                                                  @RequestParam(required = false) String name) {
+
         List<ApplicationDto> applications = applicationService.findAllApplications(jobId,status, name, phone, email);
         return new ResponseEntity<>(applications, HttpStatus.OK);
     }
