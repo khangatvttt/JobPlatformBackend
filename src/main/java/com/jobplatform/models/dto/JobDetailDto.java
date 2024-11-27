@@ -1,5 +1,6 @@
 package com.jobplatform.models.dto;
 
+import com.jobplatform.models.Job;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.jobplatform.models.Company;
 import com.jobplatform.models.Job;

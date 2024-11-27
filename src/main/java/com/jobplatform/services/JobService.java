@@ -78,7 +78,15 @@ public class JobService {
         Job job = jobRepository.findById(id).orElseThrow(() -> new NoSuchElementException("Job with id: " + id +" is not found"));
         checkOwnership(job.getUser().getId());
 
+        Job.Status oldStatus = job.getStatus();
+
+        UserAccount userAccount = (UserAccount) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
         jobMapper.updateJob(jobDetailDto, job);
+
+        if (oldStatus == Job.Status.PENDING_APPROVAL && userAccount.getRole()!= UserAccount.Role.ROLE_ADMIN){
+            job.setStatus(oldStatus);
+        }
         Job updatedJob = jobRepository.save(job);
         return jobMapper.toDto(updatedJob);
     }

@@ -3,7 +3,10 @@ package com.jobplatform.services;
 import com.google.auth.Credentials;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.storage.*;
+import com.jobplatform.models.CvFile;
 import com.jobplatform.models.UserAccount;
+import com.jobplatform.repositories.CvFileRepository;
+import com.jobplatform.repositories.UserRepository;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -17,34 +20,62 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
+import java.time.LocalDateTime;
+import java.util.*;
 
 @Service
 public class FirebaseService {
+
+    private final UserRepository userRepository;
+    private final CvFileRepository cvFileRepository;
 
     private static final List<String> allowedTypes = Arrays.asList(
             "application/pdf", // PDF format
             "application/msword", // Microsoft Word (.doc)
             "application/vnd.openxmlformats-officedocument.wordprocessingml.document" // Microsoft Word (.docx)
     );
+
+    private static final List<String> allowedImageTypes = Arrays.asList(
+            "image/jpeg",  // JPEG format
+            "image/png",   // PNG format
+            "image/gif",   // GIF format
+            "image/bmp",   // BMP format
+            "image/webp"   // WEBP format
+    );
     @Value("${firebase.bucket}")
     private String firebaseBucket;
 
-    private String uploadFileToFirebase(InputStream inputStream, String fileName, String fileType) throws IOException {
+    public FirebaseService(UserRepository userRepository, CvFileRepository cvFileRepository) {
+        this.userRepository = userRepository;
+        this.cvFileRepository = cvFileRepository;
+    }
+
+    private String uploadFileToFirebase(MultipartFile file, String fileName) throws IOException {
         BlobId blobId = BlobId.of(firebaseBucket, fileName);
-        BlobInfo blobInfo = BlobInfo.newBuilder(blobId).setContentType(fileType).build();
+        BlobInfo blobInfo = BlobInfo.newBuilder(blobId).setContentType(file.getContentType()).build();
 
         InputStream credentialsStream = FirebaseService.class.getClassLoader().getResourceAsStream("firebase-key.json");
         Credentials credentials = GoogleCredentials.fromStream(credentialsStream);
         Storage storage = StorageOptions.newBuilder().setCredentials(credentials).build().getService();
 
-        storage.create(blobInfo, inputStream);
+        storage.create(blobInfo, file.getInputStream());
 
         String DOWNLOAD_URL = "https://firebasestorage.googleapis.com/v0/b/%s/o/%s?alt=media";
         return String.format(DOWNLOAD_URL, firebaseBucket, URLEncoder.encode(fileName, StandardCharsets.UTF_8));
+    }
+
+    @SneakyThrows
+    public String uploadImageToFirebase(MultipartFile multipartFile) throws IOException {
+        String fileName = multipartFile.getOriginalFilename();
+        fileName = UUID.randomUUID().toString().concat(this.getExtension(fileName));
+        fileName = "images/" + fileName;
+
+        String fileType = multipartFile.getContentType();
+        if (!allowedImageTypes.contains(fileType)) {
+            throw new HttpMediaTypeNotSupportedException("File type is not accept. Only allow (.jpeg, .png, .gif, .bmp, .webp)");
+        }
+
+        return uploadFileToFirebase(multipartFile, fileName);
     }
 
     private String getExtension(String fileName) {
@@ -52,22 +83,28 @@ public class FirebaseService {
     }
 
     @SneakyThrows
-    public String upload(MultipartFile multipartFile) {
+    public CvFile uploadCv(MultipartFile multipartFile, Long userId) {
         String fileType = multipartFile.getContentType();
         if (!allowedTypes.contains(fileType)) {
             throw new HttpMediaTypeNotSupportedException("File type is not accept. Only allow (.pdf, .doc, .docx)");
         }
-
+        CvFile cvFile = new CvFile();
         String fileName = multipartFile.getOriginalFilename();
-        UserAccount userAccount = (UserAccount) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        fileName = UUID.randomUUID().toString().concat(this.getExtension(fileName));
-        fileName = userAccount.getId()+"/"+fileName;
-        String URL;
-        try (InputStream inputStream = multipartFile.getInputStream()) {
-            URL = this.uploadFileToFirebase(inputStream, fileName, fileType);
+        cvFile.setCvName(fileName);
+        cvFile.setUploadedAt(LocalDateTime.now());
+        UserAccount currentUser = (UserAccount) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (currentUser.getRole() == UserAccount.Role.ROLE_JOB_SEEKER) {
+            cvFile.setUser(currentUser);
+        } else {
+            UserAccount user = userRepository.findById(userId).orElseThrow(
+                    () -> new NoSuchElementException("User with id " + userId + "is not found"));
+            cvFile.setUser(user);
         }
+        fileName = "cvs/" + UUID.randomUUID().toString().concat(this.getExtension(fileName));
 
-        return URL;
+        String urlFile = uploadFileToFirebase(multipartFile, fileName);
+        cvFile.setCvUrl(urlFile);
+        return cvFileRepository.save(cvFile);
     }
 
     public List<String> getFilesByUserId(Long userId) {
@@ -92,7 +129,6 @@ public class FirebaseService {
     }
 
 
-
     public boolean deleteFile(String url) {
         String[] parts = url.split("[/?]");
         String fileName = parts[parts.length - 2];
@@ -107,13 +143,6 @@ public class FirebaseService {
         }
     }
 
-    @SneakyThrows
-    private void checkOwnership(Long resourceOwnerId){
-        UserAccount userAccount = (UserAccount) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (userAccount.getRole()!= UserAccount.Role.ROLE_ADMIN && !userAccount.getId().equals(resourceOwnerId)){
-            throw new NoPermissionException();
-        }
-    }
 
 }
 
