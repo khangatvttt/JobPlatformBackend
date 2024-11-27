@@ -12,7 +12,9 @@ public interface JobMapper {
     @Mappings({
             @Mapping(source = "user.company.name", target = "companyName"),
             @Mapping(source = "user.company.images", target = "companyImages"),
-            @Mapping(source = "user.company.location", target = "companyLocation")
+            @Mapping(source = "user.company.location", target = "companyLocation"),
+            @Mapping(source = "user.company.companySize", target = "companySize")
+
     })
     JobDetailDto toDto(Job job);
 

@@ -21,14 +21,14 @@ public class CompanyController {
     }
 
     @PostMapping("")
-    public ResponseEntity<CompanyDto> addCompany(@Valid @RequestBody CompanyDto companyDto) {
-        CompanyDto savedCompany = companyService.addCompany(companyDto);
+    public ResponseEntity<Company> addCompany(@Valid @RequestBody CompanyDto companyDto) {
+        Company savedCompany = companyService.addCompany(companyDto);
         return new ResponseEntity<>(savedCompany, HttpStatus.CREATED);
     }
 
     @GetMapping("")
-    public ResponseEntity<List<CompanyDto>> findAllCompanies(@RequestParam(required = false) String companyName){
-        List<CompanyDto> companies= companyService.findAllCompanies(companyName);
+    public ResponseEntity<List<Company>> findAllCompanies(@RequestParam(required = false) String companyName) {
+        List<Company> companies = companyService.findAllCompanies(companyName);
         return new ResponseEntity<>(companies, HttpStatus.OK);
     }
 

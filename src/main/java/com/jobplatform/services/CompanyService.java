@@ -22,29 +22,28 @@ public class CompanyService {
         this.companyMapper = companyMapper;
     }
 
-    public CompanyDto addCompany(CompanyDto companyDto) {
+    public Company addCompany(CompanyDto companyDto) {
         UserAccount userAccount = (UserAccount) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         Company company = companyMapper.toEntity(companyDto);
 
-        if (userAccount.getRole()!= UserAccount.Role.ROLE_ADMIN){
+        if(userAccount.getRole() != UserAccount.Role.ROLE_ADMIN) {
             company.setStatus(false);
-        }
-        else {
+        } else {
             company.setStatus(true);
         }
-        Company savedCompany = companyRepository.save(company);
-        return companyMapper.toDto(savedCompany);
+
+        return companyRepository.save(company);
     }
 
-    public List<CompanyDto> findAllCompanies(String companyName) {
+    public List<Company> findAllCompanies(String companyName) {
         List<Company> companyList;
         if (companyName != null) {
             companyList = companyRepository.findByName(companyName);
         } else {
             companyList = companyRepository.findAll();
         }
-        return companyList.stream().map(companyMapper::toDto).toList();
+        return companyList;
     }
 
     public CompanyDto findCompanyById(Long id) {
