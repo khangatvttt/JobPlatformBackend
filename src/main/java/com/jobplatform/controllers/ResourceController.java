@@ -42,7 +42,7 @@ public class ResourceController {
         return new ResponseEntity<>(files, HttpStatus.OK);
     }
 
-    @DeleteMapping("/uploadedCv/{id}")
+    @DeleteMapping("/uploadedCv/{fileId}")
     public ResponseEntity<String> deleteCvFile(@PathVariable String fileId) {
         boolean success = firebaseService.deleteFile(fileId);
         if (success) {
