@@ -36,10 +36,16 @@ public class ResourceController {
         return new ResponseEntity<>(cvFile, HttpStatus.OK);
     }
 
-    @GetMapping("/uploadedCv/{id}")
-    public ResponseEntity<List<CvFile>> getCvFiles(@PathVariable Long id) {
-        List<CvFile> files = cvFileService.getAllCvFileByUser(id);
+    @GetMapping("/uploadedCv")
+    public ResponseEntity<List<CvFile>> getCvFiles(@RequestParam Long userId) {
+        List<CvFile> files = cvFileService.getAllCvFileByUser(userId);
         return new ResponseEntity<>(files, HttpStatus.OK);
+    }
+
+    @GetMapping("/uploadedCv/{id}")
+    public ResponseEntity<CvFile> getCVFile(@PathVariable Long id) {
+        CvFile file = cvFileService.getCvFile(id);
+        return new ResponseEntity<>(file, HttpStatus.OK);
     }
 
     @DeleteMapping("/uploadedCv/{id}")
