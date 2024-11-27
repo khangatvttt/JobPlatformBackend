@@ -42,13 +42,9 @@ public class ResourceController {
         return new ResponseEntity<>(files, HttpStatus.OK);
     }
 
-    @DeleteMapping("/uploadedCv/{fileId}")
-    public ResponseEntity<String> deleteCvFile(@PathVariable String fileId) {
-        boolean success = firebaseService.deleteFile(fileId);
-        if (success) {
-            return new ResponseEntity<>(HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+    @DeleteMapping("/uploadedCv/{id}")
+    public ResponseEntity<String> deleteCvFile(@PathVariable Long id) {
+        firebaseService.deleteCvFile(id);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }

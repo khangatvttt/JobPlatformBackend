@@ -128,18 +128,34 @@ public class FirebaseService {
         return fileNames;
     }
 
+    public void deleteCvFile(Long cvFileId) {
+        CvFile cvFile = cvFileRepository.findById(cvFileId).orElseThrow(() -> new NoSuchElementException("Cv with id " + cvFileId + "is not found"));
+        checkPermission(cvFile.getUser().getId());
+        deleteFile(cvFile.getCvUrl());
 
-    public boolean deleteFile(String url) {
-        String[] parts = url.split("[/?]");
-        String fileName = parts[parts.length - 2];
+        cvFileRepository.delete(cvFile);
+
+    }
+
+
+    @SneakyThrows
+    private boolean deleteFile(String url) {
+        String[] parts = url.split("/o/");
+        String fileName = parts[1].split("\\?")[0];
+        fileName = fileName.replace("%2F", "/");
         BlobId blobId = BlobId.of(firebaseBucket, fileName);
-        InputStream credentialsStream = FirebaseService.class.getClassLoader().getResourceAsStream("firebase-config.json");
-        try {
-            Credentials credentials = GoogleCredentials.fromStream(credentialsStream);
-            Storage storage = StorageOptions.newBuilder().setCredentials(credentials).build().getService();
-            return storage.delete(blobId);
-        } catch (Exception e) {
-            return false;
+        InputStream credentialsStream = FirebaseService.class.getClassLoader().getResourceAsStream("firebase-key.json");
+        Credentials credentials = GoogleCredentials.fromStream(credentialsStream);
+        Storage storage = StorageOptions.newBuilder().setCredentials(credentials).build().getService();
+        return storage.delete(blobId);
+    }
+
+
+    @SneakyThrows
+    private void checkPermission(Long resoureOwnerId){
+        UserAccount currentUser = (UserAccount) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (currentUser.getRole()!= UserAccount.Role.ROLE_ADMIN && !Objects.equals(currentUser.getId(), resoureOwnerId)){
+            throw new NoPermissionException();
         }
     }
 
