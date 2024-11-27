@@ -25,4 +25,10 @@ public class CvFileService {
                 () -> new NoSuchElementException("User with id " + userId + "is not found"));
         return cvFileRepository.findByUser(userAccount);
     }
+
+    public CvFile getCvFile(Long cvFileId) {
+        return cvFileRepository.findById(cvFileId).orElseThrow(
+                ()-> new NoSuchElementException("Cv file with id " + cvFileId + "is not found"));
+    }
+
 }

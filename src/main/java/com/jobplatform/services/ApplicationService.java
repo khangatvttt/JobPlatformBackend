@@ -122,12 +122,12 @@ public class ApplicationService {
 
             if (email != null) {
                 Join<Application, UserAccount> userJoin = root.join("user");
-                predicates.add(criteriaBuilder.like(criteriaBuilder.lower(userJoin.get("email")), "%" + userName.toLowerCase() + "%"));
+                predicates.add(criteriaBuilder.like(criteriaBuilder.lower(userJoin.get("email")), "%" + email.toLowerCase() + "%"));
             }
 
             if (phone != null) {
                 Join<Application, UserAccount> userJoin = root.join("user");
-                predicates.add(criteriaBuilder.like(criteriaBuilder.lower(userJoin.get("phone")), "%" + userName.toLowerCase() + "%"));
+                predicates.add(criteriaBuilder.like(criteriaBuilder.lower(userJoin.get("phone")), "%" + phone.toLowerCase() + "%"));
             }
 
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
