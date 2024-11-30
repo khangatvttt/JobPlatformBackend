@@ -62,6 +62,8 @@ public class Cv {
 
     private String portfolio;
 
+    private Boolean status;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn (name = "user_id")
     @JsonIgnore

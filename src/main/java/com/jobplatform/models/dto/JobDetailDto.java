@@ -36,9 +36,16 @@ public record JobDetailDto(
 
         Job.Status status,
 
+        String level,
+
+        String workType,
+
+        Integer numberOfRecruits,
+
         @NotNull(message = "Salary is required.")
         @Min(value = 0, message = "Salary must be positive.")
         Double salary,
+
 
         @NotNull(message = "Application deadline is required.")
         @Future(message = "Deadline must be a future date.")

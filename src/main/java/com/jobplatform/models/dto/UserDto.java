@@ -7,6 +7,8 @@ import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.*;
 
 public record UserDto(
+        Long id,
+
         @NotBlank
         @Email(message = "Invalid email format")
         String email,
@@ -28,6 +30,8 @@ public record UserDto(
         Long companyId,
 
         String companyName,
+
+        String businessLicense,
 
         Boolean isActive,
 

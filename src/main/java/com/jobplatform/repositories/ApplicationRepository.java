@@ -9,7 +9,4 @@ import java.util.List;
 
 public interface ApplicationRepository extends JpaRepository<Application, Long>, JpaSpecificationExecutor<Application> {
 
-    List<Application> findByJob(Job job);
-
-    List<Application> findByStatus(Application.Status applicationStatus);
 }

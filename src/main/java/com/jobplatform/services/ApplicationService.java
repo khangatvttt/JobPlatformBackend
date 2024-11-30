@@ -57,15 +57,16 @@ public class ApplicationService {
 
         Application application = applicationMapper.toEntity(applicationDto);
         application.setUser(userAccount);
+        application.setStatus(Application.Status.PENDING);
         application.setAppliedAt(LocalDateTime.now());
         application.setJob(job);
 
         return applicationMapper.toDto(applicationRepository.save(application));
     }
 
-    public List<ApplicationDto> findAllApplications(Long jobId, String status, String name, String phone, String email) {
+    public List<ApplicationDto> findAllApplications(Long jobId, String status, String name, String phone, String email, Long recruiterId) {
         Application.Status applicationStatus = status != null ? Application.Status.valueOf(status) : null;
-        return applicationRepository.findAll(filterApplication(name, email, phone, jobId, applicationStatus))
+        return applicationRepository.findAll(filterApplication(name, email, phone, jobId, applicationStatus, recruiterId))
                 .stream()
                 .map(applicationMapper::toDto)
                 .toList();
@@ -99,7 +100,8 @@ public class ApplicationService {
             String email,
             String phone,
             Long jobId,
-            Application.Status status
+            Application.Status status,
+            Long recruiterId
     ) {
         return (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
@@ -128,6 +130,12 @@ public class ApplicationService {
             if (phone != null) {
                 Join<Application, UserAccount> userJoin = root.join("user");
                 predicates.add(criteriaBuilder.like(criteriaBuilder.lower(userJoin.get("phone")), "%" + phone.toLowerCase() + "%"));
+            }
+
+            if (recruiterId != null) {
+                Join<Application, Job> jobJoin = root.join("job");
+                Join<Job, UserAccount> userJoin = jobJoin.join("user");
+                predicates.add(criteriaBuilder.equal(userJoin.get("id"), recruiterId));
             }
 
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
