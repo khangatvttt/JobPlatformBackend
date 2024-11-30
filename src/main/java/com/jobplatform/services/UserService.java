@@ -55,11 +55,16 @@ public class UserService {
     }
 
     public UserDto updateUser(Long id, UserDto userDto) {
-        checkOwnership(id);
+        UserAccount.Role currentRole = checkOwnership(id);
         UserAccount user = userRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("User not found"));
 
-        userMapper.updateUser(userDto, user);
+        if(currentRole== UserAccount.Role.ROLE_ADMIN){
+            userMapper.updateUserAdmin(userDto, user);
+        }
+        else {
+            userMapper.updateUser(userDto, user);
+        }
 
         if (userDto.password() != null) {
             user.setPassword(passwordEncoder.encode(userDto.password()));
@@ -70,11 +75,12 @@ public class UserService {
     }
 
     @SneakyThrows
-    private void checkOwnership(Long resourceOwnerId){
+    private UserAccount.Role checkOwnership(Long resourceOwnerId){
         UserAccount userAccount = (UserAccount) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (userAccount.getRole()!= UserAccount.Role.ROLE_ADMIN && !userAccount.getId().equals(resourceOwnerId)){
             throw new NoPermissionException();
         }
+        return userAccount.getRole();
     }
 
     public static Specification<UserAccount> filterUsers(UserAccount.Role role, String email) {

@@ -21,4 +21,7 @@ public interface UserMapper {
     @Mapping(target = "isNonLocked", ignore = true)
     void updateUser(UserDto sourceUser, @MappingTarget UserAccount targetUser);
 
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    void updateUserAdmin(UserDto sourceUser, @MappingTarget UserAccount targetUser);
+
 }

@@ -29,11 +29,12 @@ public class ApplicationController {
 
     @GetMapping("")
     public ResponseEntity<List<ApplicationDto>> findAllApplications(@RequestParam(required = false) String status,
-                                                                 @RequestParam(required = false) Long jobId,
-                                                                 @RequestParam(required = false) String email,
-                                                                 @RequestParam(required = false) String phone,
-                                                                 @RequestParam(required = false) String name) {
-        List<ApplicationDto> applications = applicationService.findAllApplications(jobId,status, name, phone, email);
+                                                                    @RequestParam(required = false) Long jobId,
+                                                                    @RequestParam(required = false) String email,
+                                                                    @RequestParam(required = false) String phone,
+                                                                    @RequestParam(required = false) String name,
+                                                                    @RequestParam(required = false) Long recruiterId) {
+        List<ApplicationDto> applications = applicationService.findAllApplications(jobId, status, name, phone, email, recruiterId);
         return new ResponseEntity<>(applications, HttpStatus.OK);
     }
 

@@ -58,6 +58,12 @@ public class Job {
     @Enumerated(EnumType.STRING)
     private Status status;
 
+    private String level;
+
+    private String workType;
+
+    private Integer numberOfRecruits;
+
     @JsonIgnore
     @OneToMany (mappedBy = "job", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<Application> applications;

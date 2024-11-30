@@ -28,6 +28,12 @@ public record JobDetailDto(
 
         String industry,
 
+        String level,
+
+        String workType,
+
+        Integer numberOfRecruits,
+
         @NotNull(message = "Salary is required.")
         @Min(value = 0, message = "Salary must be positive.")
         Double salary,
