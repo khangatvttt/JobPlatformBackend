@@ -2,6 +2,7 @@ package com.jobplatform.controllers;
 
 import com.jobplatform.models.Company;
 import com.jobplatform.models.dto.CompanyDto;
+import com.jobplatform.models.dto.CompanyExtendedDto;
 import com.jobplatform.services.CompanyService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -33,9 +34,9 @@ public class CompanyController {
     }
 
 
-    @GetMapping("/id/{id}")
-    public ResponseEntity<CompanyDto> findCompanyById(@PathVariable Long id){
-        CompanyDto companyDto= companyService.findCompanyById(id);
+    @GetMapping("/{id}")
+    public ResponseEntity<CompanyExtendedDto> findCompanyById(@PathVariable Long id){
+        CompanyExtendedDto companyDto= companyService.findCompanyById(id);
         return new ResponseEntity<>(companyDto, HttpStatus.OK);
     }
 

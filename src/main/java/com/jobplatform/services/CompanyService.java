@@ -2,9 +2,9 @@ package com.jobplatform.services;
 
 import com.jobplatform.models.Company;
 import com.jobplatform.models.UserAccount;
-import com.jobplatform.models.dto.CompanyDto;
-import com.jobplatform.models.dto.CompanyMapper;
+import com.jobplatform.models.dto.*;
 import com.jobplatform.repositories.CompanyRepository;
+import com.jobplatform.repositories.JobRepository;
 import jakarta.persistence.NonUniqueResultException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -16,10 +16,14 @@ import java.util.NoSuchElementException;
 public class CompanyService {
     private final CompanyRepository companyRepository;
     private final CompanyMapper companyMapper;
+    private final JobRepository jobRepository;
+    private final JobMapper jobMapper;
 
-    public CompanyService(CompanyRepository companyRepository, CompanyMapper companyMapper) {
+    public CompanyService(CompanyRepository companyRepository, CompanyMapper companyMapper, JobRepository jobRepository, JobMapper jobMapper) {
         this.companyRepository = companyRepository;
         this.companyMapper = companyMapper;
+        this.jobRepository = jobRepository;
+        this.jobMapper = jobMapper;
     }
 
     public CompanyDto addCompany(CompanyDto companyDto) {
@@ -47,9 +51,11 @@ public class CompanyService {
         return companyList.stream().map(companyMapper::toDto).toList();
     }
 
-    public CompanyDto findCompanyById(Long id) {
+    public CompanyExtendedDto findCompanyById(Long id) {
         Company company = companyRepository.findById(id).orElseThrow(() -> new NoSuchElementException("Company with id "+id+ " is not found"));
-        return companyMapper.toDto(company);
+        List<JobDetailDto> listJobs = jobRepository.findByUser_Company(company).stream().map(jobMapper::toDto).toList();
+
+        return companyMapper.toExtendedDto(company, listJobs);
     }
 
     public void deleteCompany(Long id) {
