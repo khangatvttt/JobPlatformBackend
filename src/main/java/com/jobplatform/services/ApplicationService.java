@@ -49,7 +49,7 @@ public class ApplicationService {
 
         if (Objects.equals(applicationDto.cvType(), String.valueOf(Application.CVType.CREATED_CV))) {
             Cv cv = cvRepository.findById(applicationDto.cvId()).orElseThrow(() -> new NoSuchElementException("Cv not found"));
-            Set<Cv> cvs = userAccount.getCvs();
+           List<Cv> cvs = cvRepository.findByUserId(userAccount.getId());
             if (!cvs.contains(cv)) {
                 throw new NoPermissionException();
             }
