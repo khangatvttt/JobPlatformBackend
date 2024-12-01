@@ -42,9 +42,10 @@ public class JobController {
                                                           @RequestParam(required = false) String title,
                                                           @RequestParam(required = false) Boolean related,
                                                           @RequestParam(required = false) String status,
-                                                          @RequestParam(required = false) Long userId) {
+                                                          @RequestParam(required = false) Long userId,
+                                                          @RequestParam(required = false) String industry) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<Job> jobs = jobService.findAllJobs(pageable, title, related, status, userId);
+        Page<Job> jobs = jobService.findAllJobs(pageable, title, related, status, userId, industry);
         List<JobDetailDto> listJobs = jobs.getContent().stream().map(jobMapper::toDto).toList();
 
         HttpHeaders headers = new HttpHeaders();

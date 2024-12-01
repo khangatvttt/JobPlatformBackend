@@ -3,6 +3,8 @@ package com.jobplatform.models;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
+import org.checkerframework.common.aliasing.qual.Unique;
+
 import java.time.LocalDateTime;
 
 @Entity
