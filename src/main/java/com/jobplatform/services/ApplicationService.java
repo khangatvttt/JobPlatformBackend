@@ -25,13 +25,15 @@ public class ApplicationService {
     private final ApplicationMapper applicationMapper;
     private final CvFileRepository cvFileRepository;
     private final CvRepository cvRepository;
+    private final NotificationService notificationService;
 
-    public ApplicationService(ApplicationRepository applicationRepository, JobRepository jobRepository, ApplicationMapper applicationMapper, CvFileRepository cvFileRepository, CvRepository cvRepository) {
+    public ApplicationService(ApplicationRepository applicationRepository, JobRepository jobRepository, ApplicationMapper applicationMapper, CvFileRepository cvFileRepository, CvRepository cvRepository, NotificationService notificationService) {
         this.applicationRepository = applicationRepository;
         this.jobRepository = jobRepository;
         this.applicationMapper = applicationMapper;
         this.cvFileRepository = cvFileRepository;
         this.cvRepository = cvRepository;
+        this.notificationService = notificationService;
     }
 
     @SneakyThrows
@@ -61,6 +63,11 @@ public class ApplicationService {
         application.setAppliedAt(LocalDateTime.now());
         application.setJob(job);
 
+        //Notify to recruiter
+        String message = "Đã có ứng viên vừa nộp đơn vào công việc '"+job.getTitle()+"' mà bạn đăng";
+        String link = "/job/"+job.getId();
+        notificationService.addNotification(message, link ,job.getUser());
+
         return applicationMapper.toDto(applicationRepository.save(application));
     }
 
@@ -89,6 +96,19 @@ public class ApplicationService {
         Application existingApplication = applicationRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("Application with id " + id + " is not found"));
 
+        if (existingApplication.getStatus()!=statusApplication){
+            String statusMessage = switch (statusApplication) {
+                case PENDING -> "Đang chờ";
+                case REJECTED -> "Bị từ chối";
+                case ACCEPTED -> "Được chấp nhận";
+                default -> "Chờ phỏng vấn";
+            };
+
+            //Notify to jobSeeker
+            String message = "Đơn xin việc cho công việc '"+existingApplication.getJob().getTitle()+"' đã cập nhật trạng thái thành "+statusMessage;
+            String link = "";
+            notificationService.addNotification(message, link ,existingApplication.getUser());
+        }
         existingApplication.setStatus(statusApplication);
 
         return applicationMapper.toDto(applicationRepository.save(existingApplication));

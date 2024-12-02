@@ -31,7 +31,6 @@ public class StatisticsService {
         long numberOfJobs = jobRepository.countByCreateAtBetween(daysAgo, now);
         long numberOfApplications = applicationRepository.countByAppliedAtBetween(daysAgo, now);
         long numberOfUsers = userRepository.countByCreatedAtBetween(daysAgo, now);
-
         return new OverallStatisticsDto(numberOfJobs, numberOfApplications, numberOfUsers);
     }
 
