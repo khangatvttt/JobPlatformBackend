@@ -1,8 +1,10 @@
 package com.jobplatform.controllers;
 
+import com.jobplatform.models.Notification;
 import com.jobplatform.models.UserAccount;
 import com.jobplatform.models.dto.UserDto;
 import com.jobplatform.models.dto.UserMapper;
+import com.jobplatform.services.NotificationService;
 import com.jobplatform.services.UserService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
@@ -19,10 +21,12 @@ public class UserController {
 
     private final UserService userService;
     private final UserMapper userMapper;
+    private final NotificationService notificationService;
 
-    public UserController(UserService userService, UserMapper userMapper) {
+    public UserController(UserService userService, UserMapper userMapper, NotificationService notificationService) {
         this.userService = userService;
         this.userMapper = userMapper;
+        this.notificationService = notificationService;
     }
 
     @GetMapping("")
@@ -56,6 +60,18 @@ public class UserController {
     public ResponseEntity<UserDto> updateUser(@PathVariable Long id, @RequestBody UserDto userDto) {
         UserDto updatedUser = userService.updateUser(id, userDto);
         return new ResponseEntity<>(updatedUser, HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}/notifications")
+    public ResponseEntity<List<Notification>> updateUser(@PathVariable Long id,
+                                                   @RequestParam(defaultValue = "0") int page,
+                                                   @RequestParam(defaultValue = "10") int size
+                                                   ) {
+        Page<Notification> notificationPage = notificationService.getNotifications(id, page, size);
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("X-Total-Pages", String.valueOf(notificationPage.getTotalPages()));
+        headers.add("X-Total-Elements", String.valueOf(notificationPage.getTotalElements()));
+        return new ResponseEntity<>(notificationPage.getContent(),headers, HttpStatus.OK);
     }
 }
 
