@@ -2,6 +2,7 @@ package com.jobplatform.controllers;
 
 import com.jobplatform.models.Company;
 import com.jobplatform.models.dto.CompanyDto;
+import com.jobplatform.models.dto.CompanyExtendedDto;
 import com.jobplatform.services.CompanyService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -21,21 +22,21 @@ public class CompanyController {
     }
 
     @PostMapping("")
-    public ResponseEntity<Company> addCompany(@Valid @RequestBody CompanyDto companyDto) {
-        Company savedCompany = companyService.addCompany(companyDto);
+    public ResponseEntity<CompanyDto> addCompany(@Valid @RequestBody CompanyDto companyDto) {
+        CompanyDto savedCompany = companyService.addCompany(companyDto);
         return new ResponseEntity<>(savedCompany, HttpStatus.CREATED);
     }
 
     @GetMapping("")
-    public ResponseEntity<List<Company>> findAllCompanies(@RequestParam(required = false) String companyName) {
-        List<Company> companies = companyService.findAllCompanies(companyName);
+    public ResponseEntity<List<CompanyDto>> findAllCompanies(@RequestParam(required = false) String companyName){
+        List<CompanyDto> companies= companyService.findAllCompanies(companyName);
         return new ResponseEntity<>(companies, HttpStatus.OK);
     }
 
 
     @GetMapping("/{id}")
-    public ResponseEntity<CompanyDto> findCompanyById(@PathVariable Long id){
-        CompanyDto companyDto= companyService.findCompanyById(id);
+    public ResponseEntity<CompanyExtendedDto> findCompanyById(@PathVariable Long id){
+        CompanyExtendedDto companyDto= companyService.findCompanyById(id);
         return new ResponseEntity<>(companyDto, HttpStatus.OK);
     }
 

@@ -55,7 +55,7 @@ public class JobService {
     }
 
     // Get all jobs
-    public Page<Job> findAllJobs(Pageable pageable, String title, Boolean related, String status, Long userId) {
+    public Page<Job> findAllJobs(Pageable pageable, String title, Boolean related, String status, Long userId, String industry) {
         // Check the status
         if (status!=null) {
             Job.Status.valueOf(status);
@@ -64,7 +64,7 @@ public class JobService {
         if (title != null) {
             title = title.replace('-', ' ');
         }
-        return jobRepository.findAll(jobFilter(title, related, status, userId), pageable);
+        return jobRepository.findAll(jobFilter(title, related, status, userId, industry), pageable);
     }
 
     // Get a job by Id
@@ -99,7 +99,7 @@ public class JobService {
     }
 
     // Search job function
-    public static Specification<Job> jobFilter(String title, Boolean related, String status, Long userId) {
+    public static Specification<Job> jobFilter(String title, Boolean related, String status, Long userId, String industry) {
         return (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
 
@@ -125,6 +125,10 @@ public class JobService {
             if (userId != null) {
                 Join<Job, UserAccount> userJoin = root.join("user");
                 predicates.add(criteriaBuilder.equal(userJoin.get("id"), userId));
+            }
+
+            if (industry != null) {
+                predicates.add(criteriaBuilder.equal(root.get("industry"), industry));
             }
 
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));

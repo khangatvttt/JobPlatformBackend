@@ -62,6 +62,8 @@ public class UserAccount implements UserDetails {
 
     private LocalDateTime resetPasswordTokenExpiration;
 
+    private LocalDateTime createdAt;
+
     @Column(length = 2000)
     private String businessLicense;
 

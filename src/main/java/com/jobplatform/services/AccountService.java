@@ -71,6 +71,7 @@ public class AccountService {
 
         userAccount.setIsNonLocked(true);
         userAccount.setIsActive(false);
+        userAccount.setCreatedAt(LocalDateTime.now());
         userAccount.setPassword(passwordEncoder.encode(userAccount.getPassword()));
 
 
