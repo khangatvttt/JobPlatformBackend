@@ -13,6 +13,12 @@ public interface InterviewInvitationMapper {
     })
     InterviewInvitationDto toDto(InterviewInvitation interviewInvitation);
 
+    @Mappings({
+            @Mapping(source = "application.user.id", target = "userId"),
+            @Mapping(source = "application.job.id", target = "jobId")
+    })
+    InterviewInvitationExtendedDto toExtendedDto(InterviewInvitation interviewInvitation);
+
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "createAt", ignore = true)
     @Mapping(target = "id", ignore = true)
