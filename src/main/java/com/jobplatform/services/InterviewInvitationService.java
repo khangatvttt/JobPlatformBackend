@@ -34,15 +34,17 @@ public class InterviewInvitationService {
     private final InterviewInvitationMapper interviewInvitationMapper;
     private final JobRepository jobRepository;
     private final NotificationService notificationService;
+    private final FirebaseService firebaseService;
 
     public InterviewInvitationService(InterviewInvitationRepository interviewInvitationRepository,
                                       ApplicationRepository applicationRepository,
-                                      InterviewInvitationMapper interviewInvitationMapper, JobRepository jobRepository, NotificationService notificationService) {
+                                      InterviewInvitationMapper interviewInvitationMapper, JobRepository jobRepository, NotificationService notificationService, FirebaseService firebaseService) {
         this.interviewInvitationRepository = interviewInvitationRepository;
         this.applicationRepository = applicationRepository;
         this.interviewInvitationMapper = interviewInvitationMapper;
         this.jobRepository = jobRepository;
         this.notificationService = notificationService;
+        this.firebaseService = firebaseService;
     }
 
     @SneakyThrows
@@ -105,6 +107,8 @@ public class InterviewInvitationService {
         String message = "Bạn có thư mời phỏng vấn từ công việc '"+application.getJob().getTitle()+"'";
         String link = "";
         notificationService.addNotification(message, link ,application.getUser());
+        firebaseService.sendNotification(application.getUser().getId(), message);
+
 
         //Update status for application
         application.setStatus(Application.Status.INTERVIEWING);
@@ -124,6 +128,13 @@ public class InterviewInvitationService {
         if (!Objects.equals(existingInvitation.getApplication().getJob().getUser().getId(), userAccount.getId())) {
             throw new NoPermissionException();
         }
+
+        //Notify to jobSeeker
+        String message = "Thư mời phỏng vấn công việc '"+existingInvitation.getApplication().getJob().getTitle()+"' đã được cập nhật";
+        String link = "";
+        notificationService.addNotification(message, link ,existingInvitation.getApplication().getUser());
+        firebaseService.sendNotification(existingInvitation.getApplication().getUser().getId(), message);
+
 
         interviewInvitationMapper.updateInterviewInvitation(interviewInvitationDto, existingInvitation);
         return interviewInvitationMapper.toDto(interviewInvitationRepository.save(existingInvitation));

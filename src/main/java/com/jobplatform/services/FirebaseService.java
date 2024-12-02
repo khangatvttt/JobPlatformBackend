@@ -10,6 +10,7 @@ import com.jobplatform.models.UserAccount;
 import com.jobplatform.repositories.CvFileRepository;
 import com.jobplatform.repositories.UserRepository;
 import lombok.SneakyThrows;
+import org.aspectj.bridge.IMessage;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -30,6 +31,7 @@ public class FirebaseService {
 
     private final UserRepository userRepository;
     private final CvFileRepository cvFileRepository;
+    private final TokenFirebaseService tokenFirebaseService;
 
     private static final List<String> allowedTypes = Arrays.asList(
             "application/pdf", // PDF format
@@ -47,9 +49,10 @@ public class FirebaseService {
     @Value("${firebase.bucket}")
     private String firebaseBucket;
 
-    public FirebaseService(UserRepository userRepository, CvFileRepository cvFileRepository) {
+    public FirebaseService(UserRepository userRepository, CvFileRepository cvFileRepository, TokenFirebaseService tokenFirebaseService) {
         this.userRepository = userRepository;
         this.cvFileRepository = cvFileRepository;
+        this.tokenFirebaseService = tokenFirebaseService;
     }
 
     private String uploadFileToFirebase(MultipartFile file, String fileName) throws IOException {
@@ -161,18 +164,20 @@ public class FirebaseService {
         }
     }
 
-    public void sendNotification(String token, String title, String body) {
-        Message message = Message.builder()
-                .putData("title", title)
-                .putData("body", body)
-                .setToken(token)
-                .build();
+    public void sendNotification(Long userId, String messageContent) {
+        List<String> tokenList = tokenFirebaseService.getToken(userId);
+        for (String token : tokenList) {
+            Message message = Message.builder()
+                    .putData("message", messageContent)
+                    .setToken(token)
+                    .build();
 
-        try {
-            String response = FirebaseMessaging.getInstance().send(message);
-            System.out.println("Successfully sent message: " + response);
-        } catch (Exception e) {
-            e.printStackTrace();
+            try {
+                String response = FirebaseMessaging.getInstance().send(message);
+                System.out.println("Successfully sent message: " + response);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
