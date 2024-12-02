@@ -3,6 +3,8 @@ package com.jobplatform.services;
 import com.google.auth.Credentials;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.storage.*;
+import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.firebase.messaging.Message;
 import com.jobplatform.models.CvFile;
 import com.jobplatform.models.UserAccount;
 import com.jobplatform.repositories.CvFileRepository;
@@ -156,6 +158,21 @@ public class FirebaseService {
         UserAccount currentUser = (UserAccount) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (currentUser.getRole()!= UserAccount.Role.ROLE_ADMIN && !Objects.equals(currentUser.getId(), resoureOwnerId)){
             throw new NoPermissionException();
+        }
+    }
+
+    public void sendNotification(String token, String title, String body) {
+        Message message = Message.builder()
+                .putData("title", title)
+                .putData("body", body)
+                .setToken(token)
+                .build();
+
+        try {
+            String response = FirebaseMessaging.getInstance().send(message);
+            System.out.println("Successfully sent message: " + response);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 

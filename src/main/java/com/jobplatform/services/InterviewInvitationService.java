@@ -33,14 +33,16 @@ public class InterviewInvitationService {
     private final ApplicationRepository applicationRepository;
     private final InterviewInvitationMapper interviewInvitationMapper;
     private final JobRepository jobRepository;
+    private final NotificationService notificationService;
 
     public InterviewInvitationService(InterviewInvitationRepository interviewInvitationRepository,
                                       ApplicationRepository applicationRepository,
-                                      InterviewInvitationMapper interviewInvitationMapper, JobRepository jobRepository) {
+                                      InterviewInvitationMapper interviewInvitationMapper, JobRepository jobRepository, NotificationService notificationService) {
         this.interviewInvitationRepository = interviewInvitationRepository;
         this.applicationRepository = applicationRepository;
         this.interviewInvitationMapper = interviewInvitationMapper;
         this.jobRepository = jobRepository;
+        this.notificationService = notificationService;
     }
 
     @SneakyThrows
@@ -98,6 +100,15 @@ public class InterviewInvitationService {
         interviewInvitation.setCreateAt(LocalDateTime.now());
         interviewInvitation.setApplication(application);
         interviewInvitation.setId(null);
+
+        //Notify to jobSeeker
+        String message = "Bạn có thư mời phỏng vấn từ công việc '"+application.getJob().getTitle()+"'";
+        String link = "";
+        notificationService.addNotification(message, link ,application.getUser());
+
+        //Update status for application
+        application.setStatus(Application.Status.INTERVIEWING);
+        applicationRepository.save(application);
 
         InterviewInvitation savedInterviewInvitation = interviewInvitationRepository.save(interviewInvitation);
         return interviewInvitationMapper.toDto(savedInterviewInvitation);
