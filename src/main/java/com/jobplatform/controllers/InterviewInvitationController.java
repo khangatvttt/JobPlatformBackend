@@ -1,10 +1,13 @@
 package com.jobplatform.controllers;
 
 import com.jobplatform.models.dto.InterviewInvitationDto;
+import com.jobplatform.models.dto.InterviewInvitationExtendedDto;
 import com.jobplatform.services.InterviewInvitationService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/interview-invitations")
@@ -16,8 +19,14 @@ public class InterviewInvitationController {
         this.interviewInvitationService = interviewInvitationService;
     }
 
+    @GetMapping("")
+    public ResponseEntity<List<InterviewInvitationExtendedDto>> getInterviewInvitations(@RequestParam(required = false) Long jobId,
+                                                                                        @RequestParam(required = false) Long userId) {
+        return new ResponseEntity<>(interviewInvitationService.getInterviewInvitations(jobId, userId), HttpStatus.OK);
+    }
+
     @GetMapping("/{id}")
-    public ResponseEntity<InterviewInvitationDto> getInterviewInvitation(@PathVariable Long id) {
+    public ResponseEntity<InterviewInvitationExtendedDto> getInterviewInvitation(@PathVariable Long id) {
         return new ResponseEntity<>(interviewInvitationService.getInterviewInvitation(id), HttpStatus.OK);
     }
 

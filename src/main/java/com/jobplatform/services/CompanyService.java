@@ -6,6 +6,7 @@ import com.jobplatform.models.dto.*;
 import com.jobplatform.repositories.CompanyRepository;
 import com.jobplatform.repositories.JobRepository;
 import jakarta.persistence.NonUniqueResultException;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -31,23 +32,13 @@ public class CompanyService {
 
         Company company = companyMapper.toEntity(companyDto);
 
-        if (userAccount.getRole()!= UserAccount.Role.ROLE_ADMIN){
-            company.setStatus(false);
-        }
-        else {
-            company.setStatus(true);
-        }
+        company.setStatus(userAccount.getRole() == UserAccount.Role.ROLE_ADMIN);
         Company savedCompany = companyRepository.save(company);
         return companyMapper.toDto(savedCompany);
     }
 
-    public List<CompanyDto> findAllCompanies(String companyName) {
-        List<Company> companyList;
-        if (companyName != null) {
-            companyList = companyRepository.findByName(companyName);
-        } else {
-            companyList = companyRepository.findAll();
-        }
+    public List<CompanyDto> findAllCompanies(String companyName, Boolean status) {
+        List<Company> companyList=companyRepository.findAll(filterCompany(companyName,status));
         return companyList.stream().map(companyMapper::toDto).toList();
     }
 
@@ -70,6 +61,20 @@ public class CompanyService {
 
         Company updatedCompany = companyRepository.save(company);
         return companyMapper.toDto(updatedCompany);
+    }
+
+    public static Specification<Company> filterCompany(String companyName, Boolean status) {
+        return (root, query, criteriaBuilder) -> {
+            var predicate = criteriaBuilder.conjunction();
+
+            if (status != null) {
+                predicate = criteriaBuilder.and(predicate, criteriaBuilder.equal(root.get("status"), status));
+            }
+            if (companyName != null && !companyName.isEmpty()) {
+                predicate = criteriaBuilder.and(predicate, criteriaBuilder.like(criteriaBuilder.lower(root.get("name")), "%" + companyName.toLowerCase() + "%"));
+            }
+            return predicate;
+        };
     }
 
 }
