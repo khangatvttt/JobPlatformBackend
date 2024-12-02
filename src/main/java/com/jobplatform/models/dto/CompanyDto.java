@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 public record CompanyDto(
+        Long id,
         @NotBlank(message = "Company name is required")
         @Size(min = 2, max = 100, message = "Company name must be between 2 and 100 characters")
         String name,
@@ -23,6 +24,8 @@ public record CompanyDto(
         @NotBlank(message = "Industry is required")
         String industry,
 
-        Integer companySize
+        Integer companySize,
+
+        Boolean status
 
 ) {}
