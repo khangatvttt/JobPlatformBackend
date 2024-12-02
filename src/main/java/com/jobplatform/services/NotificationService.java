@@ -10,7 +10,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import javax.naming.NoPermissionException;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Service
 public class NotificationService {
@@ -36,9 +38,12 @@ public class NotificationService {
     }
 
     @SneakyThrows
-    public Page<Notification> getNotifications(int page, int size){
+    public Page<Notification> getNotifications(Long userId, int page, int size){
         UserAccount userAccount = (UserAccount) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (!Objects.equals(userId, userAccount.getId())){
+            throw new NoPermissionException();
+        }
         Pageable pageable = PageRequest.of(page, size);
-        return notificationRepository.findByUserId(userAccount.getId(), pageable);
+        return notificationRepository.findByUserId(userId, pageable);
     }
 }
