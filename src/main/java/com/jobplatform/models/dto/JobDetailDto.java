@@ -34,6 +34,8 @@ public record JobDetailDto(
 
         Integer numberOfRecruits,
 
+        String address,
+
         @NotNull(message = "Salary is required.")
         @Min(value = 0, message = "Salary must be positive.")
         Double salary,
