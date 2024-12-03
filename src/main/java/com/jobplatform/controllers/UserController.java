@@ -5,6 +5,7 @@ import com.jobplatform.models.UserAccount;
 import com.jobplatform.models.dto.UserDto;
 import com.jobplatform.models.dto.UserMapper;
 import com.jobplatform.services.NotificationService;
+import com.jobplatform.services.TokenFirebaseService;
 import com.jobplatform.services.UserService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
@@ -14,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/users")
@@ -22,11 +24,13 @@ public class UserController {
     private final UserService userService;
     private final UserMapper userMapper;
     private final NotificationService notificationService;
+    private final TokenFirebaseService tokenFirebaseService;
 
-    public UserController(UserService userService, UserMapper userMapper, NotificationService notificationService) {
+    public UserController(UserService userService, UserMapper userMapper, NotificationService notificationService, TokenFirebaseService tokenFirebaseService) {
         this.userService = userService;
         this.userMapper = userMapper;
         this.notificationService = notificationService;
+        this.tokenFirebaseService = tokenFirebaseService;
     }
 
     @GetMapping("")
@@ -72,6 +76,13 @@ public class UserController {
         headers.add("X-Total-Pages", String.valueOf(notificationPage.getTotalPages()));
         headers.add("X-Total-Elements", String.valueOf(notificationPage.getTotalElements()));
         return new ResponseEntity<>(notificationPage.getContent(),headers, HttpStatus.OK);
+    }
+
+    @PostMapping("/fcm-token")
+    public ResponseEntity<UserDto> addFCMToken(@RequestBody Map<String, String> payload) {
+        String token = payload.get("FCMToken");
+        tokenFirebaseService.addToken(token);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }
 

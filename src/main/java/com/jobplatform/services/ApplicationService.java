@@ -26,14 +26,16 @@ public class ApplicationService {
     private final CvFileRepository cvFileRepository;
     private final CvRepository cvRepository;
     private final NotificationService notificationService;
+    private final FirebaseService firebaseService;
 
-    public ApplicationService(ApplicationRepository applicationRepository, JobRepository jobRepository, ApplicationMapper applicationMapper, CvFileRepository cvFileRepository, CvRepository cvRepository, NotificationService notificationService) {
+    public ApplicationService(ApplicationRepository applicationRepository, JobRepository jobRepository, ApplicationMapper applicationMapper, CvFileRepository cvFileRepository, CvRepository cvRepository, NotificationService notificationService, FirebaseService firebaseService) {
         this.applicationRepository = applicationRepository;
         this.jobRepository = jobRepository;
         this.applicationMapper = applicationMapper;
         this.cvFileRepository = cvFileRepository;
         this.cvRepository = cvRepository;
         this.notificationService = notificationService;
+        this.firebaseService = firebaseService;
     }
 
     @SneakyThrows
@@ -67,6 +69,7 @@ public class ApplicationService {
         String message = "Đã có ứng viên vừa nộp đơn vào công việc '"+job.getTitle()+"' mà bạn đăng";
         String link = "/job/"+job.getId();
         notificationService.addNotification(message, link ,job.getUser());
+        firebaseService.sendNotification(job.getUser().getId(), message);
 
         return applicationMapper.toDto(applicationRepository.save(application));
     }
@@ -108,6 +111,8 @@ public class ApplicationService {
             String message = "Đơn xin việc cho công việc '"+existingApplication.getJob().getTitle()+"' đã cập nhật trạng thái thành "+statusMessage;
             String link = "";
             notificationService.addNotification(message, link ,existingApplication.getUser());
+            firebaseService.sendNotification(existingApplication.getUser().getId(), message);
+
         }
         existingApplication.setStatus(statusApplication);
 
