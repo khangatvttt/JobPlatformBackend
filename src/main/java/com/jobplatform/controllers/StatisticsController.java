@@ -39,4 +39,9 @@ public class StatisticsController {
     public ResponseEntity<List<CountDto>> getCountOfStatusApplications(@RequestParam long days){
         return new ResponseEntity<>(statisticsService.getApplicationStatusCount(days), HttpStatus.OK);
     }
+
+    @GetMapping("/statistic-by-time")
+    public ResponseEntity<List<List<CountDto>>> getDataThroughTime(@RequestParam long days){
+        return new ResponseEntity<>(statisticsService.getDataThroughTime(days), HttpStatus.OK);
+    }
 }

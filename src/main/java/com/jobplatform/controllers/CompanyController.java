@@ -1,10 +1,13 @@
 package com.jobplatform.controllers;
 
-import com.jobplatform.models.Company;
+import com.jobplatform.models.Job;
 import com.jobplatform.models.dto.CompanyDto;
-import com.jobplatform.models.dto.CompanyExtendedDto;
+import com.jobplatform.models.dto.JobDetailDto;
+import com.jobplatform.models.dto.JobMapper;
 import com.jobplatform.services.CompanyService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,9 +19,11 @@ import java.util.List;
 public class CompanyController {
 
     private final CompanyService companyService;
+    private final JobMapper jobMapper;
 
-    public CompanyController(CompanyService companyService) {
+    public CompanyController(CompanyService companyService, JobMapper jobMapper) {
         this.companyService = companyService;
+        this.jobMapper = jobMapper;
     }
 
     @PostMapping("")
@@ -36,8 +41,8 @@ public class CompanyController {
 
 
     @GetMapping("/{id}")
-    public ResponseEntity<CompanyExtendedDto> findCompanyById(@PathVariable Long id){
-        CompanyExtendedDto companyDto= companyService.findCompanyById(id);
+    public ResponseEntity<CompanyDto> findCompanyById(@PathVariable Long id){
+        CompanyDto companyDto= companyService.findCompanyById(id);
         return new ResponseEntity<>(companyDto, HttpStatus.OK);
     }
 
@@ -51,6 +56,18 @@ public class CompanyController {
     public ResponseEntity<CompanyDto> updateCompany(@PathVariable Long id, @Valid @RequestBody CompanyDto companyDto) {
         CompanyDto updatedCompany = companyService.updateCompany(id, companyDto);
         return new ResponseEntity<>(updatedCompany, HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}/jobs")
+    public ResponseEntity<List<JobDetailDto>> getJobByCompany(@PathVariable Long id,
+                                                              @RequestParam(defaultValue = "0") int page,
+                                                              @RequestParam(defaultValue = "10") int size) {
+        Page<Job> jobs = companyService.getJobByCompany(id, page, size);
+        List<JobDetailDto> jobDetailDtoList = jobs.stream().map(jobMapper::toDto).toList();
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("X-Total-Pages", String.valueOf(jobs.getTotalPages()));
+        headers.add("X-Total-Elements", String.valueOf(jobs.getTotalElements()));
+        return new ResponseEntity<>(jobDetailDtoList, headers, HttpStatus.OK);
     }
 }
 
