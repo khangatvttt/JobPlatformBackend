@@ -5,11 +5,13 @@ import com.jobplatform.models.dto.UserDto;
 import com.jobplatform.models.dto.UserMapper;
 import com.jobplatform.repositories.UserRepository;
 import lombok.SneakyThrows;
+import org.apache.coyote.BadRequestException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -17,6 +19,9 @@ import org.springframework.stereotype.Service;
 import javax.naming.NoPermissionException;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class UserService {
@@ -81,6 +86,29 @@ public class UserService {
             throw new NoPermissionException();
         }
         return userAccount.getRole();
+    }
+
+    @SneakyThrows
+    public void changePassword(Long id, String oldPassword, String newPassword){
+        String regex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[A-Za-z\\d]{6,}$";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(newPassword);
+        if (!matcher.matches()) {
+            throw new BadRequestException("Password is not strong enough. Must have at least 6 characters, one uppercase, one lowercase, and one digit");
+        }
+
+        UserAccount user = userRepository.findById(id).orElseThrow(()->new NoSuchElementException("User id not found"));
+        UserAccount userAccount = (UserAccount) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (!Objects.equals(userAccount.getId(), user.getId())){
+            throw new NoPermissionException();
+        }
+        boolean isPasswordMatch = passwordEncoder.matches(oldPassword, user.getPassword());
+        if (!isPasswordMatch){
+            throw new NoPermissionException("Old password is not match");
+        }
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
     }
 
     public static Specification<UserAccount> filterUsers(UserAccount.Role role, String email) {

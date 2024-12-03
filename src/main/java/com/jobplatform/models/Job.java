@@ -42,6 +42,8 @@ public class Job {
 
     private String industry;
 
+    private String address;
+
     @Column(nullable = false)
     @NotNull(message = "Salary is required.")
     @Min(value = 0, message = "Salary must be positive.")

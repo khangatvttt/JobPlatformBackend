@@ -1,11 +1,15 @@
 package com.jobplatform.services;
 
 import com.jobplatform.models.Company;
+import com.jobplatform.models.Job;
 import com.jobplatform.models.UserAccount;
 import com.jobplatform.models.dto.*;
 import com.jobplatform.repositories.CompanyRepository;
 import com.jobplatform.repositories.JobRepository;
 import jakarta.persistence.NonUniqueResultException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -42,11 +46,9 @@ public class CompanyService {
         return companyList.stream().map(companyMapper::toDto).toList();
     }
 
-    public CompanyExtendedDto findCompanyById(Long id) {
+    public CompanyDto findCompanyById(Long id) {
         Company company = companyRepository.findById(id).orElseThrow(() -> new NoSuchElementException("Company with id "+id+ " is not found"));
-        List<JobDetailDto> listJobs = jobRepository.findByUser_Company(company).stream().map(jobMapper::toDto).toList();
-
-        return companyMapper.toExtendedDto(company, listJobs);
+        return companyMapper.toDto(company);
     }
 
     public void deleteCompany(Long id) {
@@ -61,6 +63,12 @@ public class CompanyService {
 
         Company updatedCompany = companyRepository.save(company);
         return companyMapper.toDto(updatedCompany);
+    }
+
+    public Page<Job> getJobByCompany(Long companyId, int page, int size){
+        companyRepository.findById(companyId).orElseThrow(() -> new NoSuchElementException("Company not found"));
+        Pageable pageable = PageRequest.of(page, size);
+        return jobRepository.findByUser_Company_Id(companyId, pageable);
     }
 
     public static Specification<Company> filterCompany(String companyName, Boolean status) {

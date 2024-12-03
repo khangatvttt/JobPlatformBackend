@@ -7,7 +7,9 @@ import com.jobplatform.models.dto.UserMapper;
 import com.jobplatform.services.NotificationService;
 import com.jobplatform.services.TokenFirebaseService;
 import com.jobplatform.services.UserService;
-import jakarta.validation.Valid;
+
+import lombok.SneakyThrows;
+import org.apache.coyote.BadRequestException;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -16,6 +18,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @RestController
 @RequestMapping("/users")
@@ -76,6 +80,16 @@ public class UserController {
         headers.add("X-Total-Pages", String.valueOf(notificationPage.getTotalPages()));
         headers.add("X-Total-Elements", String.valueOf(notificationPage.getTotalElements()));
         return new ResponseEntity<>(notificationPage.getContent(),headers, HttpStatus.OK);
+    }
+
+    @SneakyThrows
+    @PostMapping("/{id}/change-password")
+    public ResponseEntity<Void> changePassword (@PathVariable Long id,
+                                                @RequestBody Map<String, String> payload){
+        String oldPassword = payload.get("oldPassword");
+        String newPassword = payload.get("newPassword");
+        userService.changePassword(id, oldPassword, newPassword);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @PostMapping("/fcm-token")

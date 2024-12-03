@@ -13,9 +13,6 @@ public interface CompanyMapper {
 
     CompanyDto toDto(Company company);
 
-    @Mapping(target = "jobs", source = "jobs")
-    CompanyExtendedDto toExtendedDto(Company company, List<JobDetailDto> jobs);
-
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateCompany(CompanyDto sourceCompany, @MappingTarget Company targetCompany);
 
