@@ -156,7 +156,7 @@ public class AccountService {
 
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("code", code);
-        params.add("redirect_uri", "http://localhost:8080/auth/grantcode");
+        params.add("redirect_uri", "http://localhost:5173/loginGoogle");
         params.add("client_id", clientId);
         params.add("client_secret", clientSecret);
         params.add("grant_type", "authorization_code");
