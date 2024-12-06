@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.Map;
 
 @RequestMapping("/auth")
@@ -62,6 +63,19 @@ public class AuthController {
         String password = payload.get("password");
         accountService.resetPassword(token, password);
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @GetMapping("/grantcode")
+    public LoginTokenDto grantCode(@RequestParam("code") String code,
+                                 @RequestParam("scope") String scope,
+                                 @RequestParam("authuser") String authUser,
+                                 @RequestParam("prompt") String prompt) {
+        return accountService.processGrantCode(code);
+    }
+
+    @GetMapping("/google-login")
+    public LoginTokenDto googleLogin(@RequestParam("code") String code) {
+        return accountService.processGrantCode(code);
     }
 
     private String getBaseURL(HttpServletRequest request){

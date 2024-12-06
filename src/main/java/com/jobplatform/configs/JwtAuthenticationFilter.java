@@ -40,8 +40,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         // Endpoint that no need filtered
         whitelist.add(new WhitelistEntry("/auth", null));          // Allow all methods for /auth
         whitelist.add(new WhitelistEntry("/jobs", "GET"));
-        whitelist.add(new WhitelistEntry("/chat", null));          // Allow all methods for /auth
-
     }
 
     @Override

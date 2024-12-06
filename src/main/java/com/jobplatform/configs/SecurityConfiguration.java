@@ -23,13 +23,11 @@ public class SecurityConfiguration {
     private final AuthenticationProvider authenticationProvider;
 
 
-    public SecurityConfiguration( JwtAuthenticationFilter jwtAuthenticationFilter,
-                                  AuthenticationProvider authenticationProvider) {
+    public SecurityConfiguration(JwtAuthenticationFilter jwtAuthenticationFilter,
+                                 AuthenticationProvider authenticationProvider) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
         this.authenticationProvider = authenticationProvider;
-
     }
-
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
@@ -54,7 +52,7 @@ public class SecurityConfiguration {
                     .requestMatchers(HttpMethod.PATCH,"/reviews/**").hasAnyAuthority(UserAccount.Role.ROLE_JOB_SEEKER.name(), UserAccount.Role.ROLE_ADMIN.name())
                     .requestMatchers("/statistics/**").hasAnyAuthority(UserAccount.Role.ROLE_ADMIN.name())
                     .requestMatchers(HttpMethod.GET,"/users").hasAnyAuthority(UserAccount.Role.ROLE_ADMIN.name())
-                    .requestMatchers("/auth/**").permitAll()
+                    .requestMatchers("/auth/**","/grantcode/**").permitAll()
                     .anyRequest().authenticated())
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
