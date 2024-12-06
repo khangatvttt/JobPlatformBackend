@@ -20,11 +20,9 @@ import java.util.List;
 @RequestMapping("/cvs")
 public class CvController {
     private final CvService cvService;
-    private final FirebaseService firebaseService;
 
-    public CvController(CvService cvService, FirebaseService firebaseService) {
+    public CvController(CvService cvService) {
         this.cvService = cvService;
-        this.firebaseService = firebaseService;
     }
 
     @PostMapping("")
