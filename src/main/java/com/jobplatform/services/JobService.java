@@ -11,6 +11,8 @@ import com.jobplatform.repositories.UserRepository;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
 import lombok.SneakyThrows;
+import org.apache.coyote.BadRequestException;
+import org.hibernate.Hibernate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -40,8 +42,19 @@ public class JobService {
     }
 
     // Create a new job
+    @Transactional
+    @SneakyThrows
     public JobDetailDto addJob(JobDetailDto jobDetailDto) {
         UserAccount userAccount = (UserAccount) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (userAccount.getAvailableJobPosts()==null || userAccount.getAvailableJobPosts()<=0){
+            throw new BadRequestException("This account hasn't had enough number of job post allowed to post");
+        }
+
+
+        if (userAccount.getCompany() != null) {
+            Hibernate.initialize(userAccount.getCompany());
+        }
+
 
         Job job = jobMapper.toEntity(jobDetailDto);
 
@@ -50,6 +63,11 @@ public class JobService {
         job.setStatus(Job.Status.PENDING_APPROVAL);
 
         Job savedJob = jobRepository.save(job);
+
+        //Reduce number of jobs user can post
+        Integer jobPostsLeft = userAccount.getAvailableJobPosts()-1;
+        userRepository.updateAvailableJobPosts(jobPostsLeft, userAccount.getId());
+        userAccount.setAvailableJobPosts(jobPostsLeft);
 
         return jobMapper.toDto(savedJob);
     }

@@ -64,6 +64,8 @@ public class UserAccount implements UserDetails {
 
     private LocalDateTime createdAt;
 
+    private Integer availableJobPosts;
+
     @Column(length = 2000)
     private String businessLicense;
 
