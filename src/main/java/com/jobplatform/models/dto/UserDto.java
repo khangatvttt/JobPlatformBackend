@@ -37,6 +37,8 @@ public record UserDto(
 
         Boolean isNonLocked,
 
+        Integer availableJobPosts,
+
         @NotNull
         @Enumerated(EnumType.STRING)
         UserAccount.Role role
