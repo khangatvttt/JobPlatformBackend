@@ -5,6 +5,7 @@ import com.jobplatform.models.Job;
 import com.jobplatform.models.UserAccount;
 import com.jobplatform.models.dto.JobDetailDto;
 import com.jobplatform.models.dto.JobMapper;
+import com.jobplatform.models.dto.UpdateJobDto;
 import com.jobplatform.repositories.CompanyRepository;
 import com.jobplatform.repositories.JobRepository;
 import com.jobplatform.repositories.UserRepository;
@@ -92,7 +93,7 @@ public class JobService {
     }
 
     // Update Job (partial update)
-    public JobDetailDto updateJob(Long id, JobDetailDto jobDetailDto) {
+    public JobDetailDto updateJob(Long id, UpdateJobDto jobDetailDto) {
         Job job = jobRepository.findById(id).orElseThrow(() -> new NoSuchElementException("Job with id: " + id +" is not found"));
         checkOwnership(job.getUser().getId());
 

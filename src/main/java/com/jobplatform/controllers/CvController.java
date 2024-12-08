@@ -3,26 +3,26 @@ package com.jobplatform.controllers;
 import com.jobplatform.models.Cv;
 import com.jobplatform.models.dto.CvDto;
 import com.jobplatform.services.CvService;
-import com.jobplatform.services.FirebaseService;
+import com.jobplatform.services.GeminiAIService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.nio.CharBuffer;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/cvs")
 public class CvController {
     private final CvService cvService;
+    private final GeminiAIService geminiAIService;
 
-    public CvController(CvService cvService) {
+    public CvController(CvService cvService, GeminiAIService geminiAIService) {
         this.cvService = cvService;
+        this.geminiAIService = geminiAIService;
     }
 
     @PostMapping("")
@@ -58,5 +58,10 @@ public class CvController {
     public ResponseEntity<Cv> deleteCv(@PathVariable Long id) {
         cvService.deleteCv(id);
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}/evaluation")
+    public ResponseEntity<Map<String, Object>> evaluateCv(@PathVariable Long id) {
+        return new ResponseEntity<>(geminiAIService.analyzeCv(id),HttpStatus.OK);
     }
 }
