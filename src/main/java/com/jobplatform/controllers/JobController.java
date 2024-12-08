@@ -4,6 +4,7 @@ import com.jobplatform.models.Job;
 import com.jobplatform.models.UserAccount;
 import com.jobplatform.models.dto.JobDetailDto;
 import com.jobplatform.models.dto.JobMapper;
+import com.jobplatform.models.dto.UpdateJobDto;
 import com.jobplatform.services.JobService;
 import jakarta.validation.Valid;
 import lombok.SneakyThrows;
@@ -63,7 +64,7 @@ public class JobController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<JobDetailDto> updateJob(@PathVariable Long id,@RequestBody JobDetailDto jobDetailDto) {
+    public ResponseEntity<JobDetailDto> updateJob(@PathVariable Long id,@RequestBody UpdateJobDto jobDetailDto) {
         JobDetailDto updatedJob = jobService.updateJob(id, jobDetailDto);
         return new ResponseEntity<>(updatedJob, HttpStatus.OK);
     }
