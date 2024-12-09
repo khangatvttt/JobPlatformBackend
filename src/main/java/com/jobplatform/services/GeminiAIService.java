@@ -1,13 +1,21 @@
 package com.jobplatform.services;
 
 import com.jobplatform.models.Cv;
+import com.jobplatform.models.CvFile;
+import com.jobplatform.repositories.CvFileRepository;
 import com.jobplatform.repositories.CvRepository;
+import lombok.SneakyThrows;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.text.PDFTextStripper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -19,8 +27,10 @@ public class GeminiAIService {
     @Value("${spring.gemini-api-key}")
     private String apiKey;
     private final CvRepository cvRepository;
+    private final CvFileRepository cvFileRepository;
 
-    public GeminiAIService(CvRepository cvRepository) {
+    public GeminiAIService(CvRepository cvRepository, CvFileRepository cvFileRepository) {
+        this.cvFileRepository = cvFileRepository;
         this.restTemplate = new RestTemplate();
         this.cvRepository = cvRepository;
     }
@@ -60,6 +70,58 @@ public class GeminiAIService {
         } catch (Exception e) {
             throw new RuntimeException("Failed to call API", e);
         }
+    }
+
+    public Map<String, Object> analyzeCvFile(Long cvId) {
+        String apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=" + apiKey;
+        CvFile cvFile = cvFileRepository.findById(cvId).orElseThrow(()-> new NoSuchElementException("CV file not found"));
+        String cvContent = readCvFile(cvFile.getCvUrl());
+        // Prepare request payload
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("contents", new Object[]{
+                Map.of("parts", new Object[]{
+                        Map.of("text", "You are a professional HR assistant. Always respond in Vietnamese. Analyze and evaluate this CV in Vietnamese:\n" + cvContent)
+                })
+        });
+
+        // Convert payload to JSON
+        ObjectMapper objectMapper = new ObjectMapper();
+        String jsonPayload;
+        try {
+            jsonPayload = objectMapper.writeValueAsString(payload);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to serialize payload", e);
+        }
+
+        // Set headers
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        HttpEntity<String> entity = new HttpEntity<>(jsonPayload, headers);
+
+        // Make the POST request
+        try {
+            ResponseEntity<String> response = restTemplate.postForEntity(apiUrl, entity, String.class);
+            // Deserialize JSON string into a Map
+            return objectMapper.readValue(response.getBody(), Map.class);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to call API", e);
+        }
+    }
+
+    @SneakyThrows
+    public String readCvFile(String pdfUrl) {
+        URL url = new URL(pdfUrl);
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setRequestMethod("GET");
+
+        InputStream inputStream = connection.getInputStream();
+        PDDocument document = PDDocument.load(inputStream);
+
+        PDFTextStripper stripper = new PDFTextStripper();
+        String pdfContent = stripper.getText(document);
+
+        return pdfContent;
     }
 
     private String formatCv(Cv cv) {
