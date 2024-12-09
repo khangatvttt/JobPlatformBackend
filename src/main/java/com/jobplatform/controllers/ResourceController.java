@@ -3,6 +3,7 @@ package com.jobplatform.controllers;
 import com.jobplatform.models.CvFile;
 import com.jobplatform.services.CvFileService;
 import com.jobplatform.services.FirebaseService;
+import com.jobplatform.services.GeminiAIService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -10,6 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/")
@@ -17,10 +19,12 @@ public class ResourceController {
 
     private final FirebaseService firebaseService;
     private final CvFileService cvFileService;
+    private final GeminiAIService geminiAIService;
 
-    public ResourceController(FirebaseService firebaseService, CvFileService cvFileService) {
+    public ResourceController(FirebaseService firebaseService, CvFileService cvFileService, GeminiAIService geminiAIService) {
         this.firebaseService = firebaseService;
         this.cvFileService = cvFileService;
+        this.geminiAIService = geminiAIService;
     }
 
     @PostMapping("/uploadImage")
@@ -53,4 +57,10 @@ public class ResourceController {
         firebaseService.deleteCvFile(id);
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
+    @GetMapping("/uploadedCv/{id}/evaluation")
+    public ResponseEntity<Map<String, Object>> readCvFile(@PathVariable Long id) {
+        return new ResponseEntity<>(geminiAIService.analyzeCvFile(id),HttpStatus.OK);
+    }
+
 }
