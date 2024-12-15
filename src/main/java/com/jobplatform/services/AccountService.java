@@ -42,6 +42,7 @@ public class AccountService {
     private final UserMapper userMapper;
     private final CompanyRepository companyRepository;
     private final String baseURL_Frontend = "http://localhost:3000";
+    private final String defaultAvatar = "https://firebasestorage.googleapis.com/v0/b/hotel-management-db2db.appspot.com/o/avatar-default.jpg?alt=media&token=1785bd27-d3da-4625-a4f8-87c706f73ce2";
     @Value("${spring.security.oauth2.client.registration.google.client-id}")
     private String clientId;
     @Value("${spring.security.oauth2.client.registration.google.client-secret}")
@@ -81,6 +82,7 @@ public class AccountService {
         userAccount.setIsNonLocked(true);
         userAccount.setIsActive(false);
         userAccount.setCreatedAt(LocalDateTime.now());
+        userAccount.setAvatarUrl(defaultAvatar);
         userAccount.setPassword(passwordEncoder.encode(userAccount.getPassword()));
 
 

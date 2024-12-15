@@ -46,6 +46,8 @@ public class UserAccount implements UserDetails {
     @Pattern(regexp = "^\\d{10}$", message = "Phone number must be exactly 10 digits")
     private String phone;
 
+    private String avatarUrl;
+
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Role role;
