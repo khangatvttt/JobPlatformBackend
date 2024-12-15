@@ -1,6 +1,7 @@
 package com.jobplatform.controllers;
 
 import com.jobplatform.models.JobSave;
+import com.jobplatform.models.dto.JobSaveDto;
 import com.jobplatform.services.JobSaveService;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,7 +28,7 @@ public class JobSaveController {
     }
 
     @GetMapping("")
-    public List<JobSave> findJobSavesByUser(){
+    public List<JobSaveDto> findJobSavesByUser(){
         return jobSaveService.findJobSaveByUser();
     }
 }

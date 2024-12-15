@@ -11,6 +11,7 @@ public interface UserMapper {
     @Mapping(target = "password", ignore = true)
     @Mappings({
             @Mapping(source = "company.name", target = "companyName"),
+            @Mapping(source = "company.id", target = "companyId")
     })
     UserDto toDto(UserAccount user);
 

@@ -38,7 +38,6 @@ public class SecurityConfiguration {
                     .requestMatchers(HttpMethod.POST,"/applications/**").hasAnyAuthority(UserAccount.Role.ROLE_JOB_SEEKER.name())
                     .requestMatchers(HttpMethod.GET,"/applications").hasAnyAuthority(UserAccount.Role.ROLE_RECRUITER.name(), UserAccount.Role.ROLE_ADMIN.name())
                     .requestMatchers(HttpMethod.DELETE,"/applications").hasAnyAuthority(UserAccount.Role.ROLE_JOB_SEEKER.name(), UserAccount.Role.ROLE_ADMIN.name())
-                    .requestMatchers(HttpMethod.POST,"/companies/**").hasAnyAuthority(UserAccount.Role.ROLE_RECRUITER.name(), UserAccount.Role.ROLE_ADMIN.name())
                     .requestMatchers(HttpMethod.DELETE,"/companies/**").hasAnyAuthority(UserAccount.Role.ROLE_RECRUITER.name(), UserAccount.Role.ROLE_ADMIN.name())
                     .requestMatchers(HttpMethod.PATCH,"/companies/**").hasAnyAuthority(UserAccount.Role.ROLE_RECRUITER.name(), UserAccount.Role.ROLE_ADMIN.name())
                     .requestMatchers(HttpMethod.POST,"/cvs/**").hasAnyAuthority(UserAccount.Role.ROLE_JOB_SEEKER.name())
@@ -54,6 +53,8 @@ public class SecurityConfiguration {
                     .requestMatchers(HttpMethod.GET,"/users").hasAnyAuthority(UserAccount.Role.ROLE_ADMIN.name())
                     .requestMatchers("/auth/**","/grantcode/**").permitAll()
                     .requestMatchers(HttpMethod.GET,"/jobs/**").permitAll()
+                    .requestMatchers(HttpMethod.POST,"/companies/**").permitAll()
+                    .requestMatchers(HttpMethod.GET,"/companies/**").permitAll()
                     .requestMatchers("/momo-payment/**").permitAll()
                     .anyRequest().authenticated())
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
