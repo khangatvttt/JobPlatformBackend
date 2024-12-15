@@ -3,6 +3,7 @@ package com.jobplatform.controllers;
 import com.jobplatform.models.UserAccount;
 import com.jobplatform.models.dto.LoginDto;
 import com.jobplatform.models.dto.LoginTokenDto;
+import com.jobplatform.models.dto.UserDto;
 import com.jobplatform.services.AccountService;
 import com.jobplatform.services.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -11,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.Map;
 
 @RequestMapping("/auth")
@@ -24,7 +26,7 @@ public class AuthController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<Void> register(HttpServletRequest request,@Valid @RequestBody UserAccount user) {
+    public ResponseEntity<Void> register(HttpServletRequest request,@Valid @RequestBody UserDto user) {
         accountService.signUp(user, getBaseURL(request));
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -61,6 +63,19 @@ public class AuthController {
         String password = payload.get("password");
         accountService.resetPassword(token, password);
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @GetMapping("/grantcode")
+    public LoginTokenDto grantCode(@RequestParam("code") String code,
+                                 @RequestParam("scope") String scope,
+                                 @RequestParam("authuser") String authUser,
+                                 @RequestParam("prompt") String prompt) {
+        return accountService.processGrantCode(code);
+    }
+
+    @GetMapping("/google-login")
+    public LoginTokenDto googleLogin(@RequestParam("code") String code) {
+        return accountService.processGrantCode(code);
     }
 
     private String getBaseURL(HttpServletRequest request){

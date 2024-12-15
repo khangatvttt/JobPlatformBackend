@@ -1,7 +1,10 @@
 package com.jobplatform.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
+import org.checkerframework.common.aliasing.qual.Unique;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -19,7 +22,8 @@ public class InterviewInvitation {
     @Column(nullable = false)
     private LocalDateTime createAt;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "application_id")
+    @JsonIgnore
     private Application application;
 }
