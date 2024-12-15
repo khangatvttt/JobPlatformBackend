@@ -34,12 +34,16 @@ public class JobService {
     private final UserRepository userRepository;
     private final CompanyRepository companyRepository;
     private final JobMapper jobMapper;
+    private final NotificationService notificationService;
+    private final FirebaseService firebaseService;
 
-    public JobService(JobRepository jobRepository, UserRepository userRepository, CompanyRepository companyRepository, JobMapper jobMapper) {
+    public JobService(JobRepository jobRepository, UserRepository userRepository, CompanyRepository companyRepository, JobMapper jobMapper, NotificationService notificationService, FirebaseService firebaseService) {
         this.jobRepository = jobRepository;
         this.userRepository = userRepository;
         this.companyRepository = companyRepository;
         this.jobMapper = jobMapper;
+        this.notificationService = notificationService;
+        this.firebaseService = firebaseService;
     }
 
     // Create a new job
@@ -105,6 +109,16 @@ public class JobService {
 
         if (oldStatus == Job.Status.PENDING_APPROVAL && userAccount.getRole()!= UserAccount.Role.ROLE_ADMIN){
             job.setStatus(oldStatus);
+        }
+        if (userAccount.getRole()== UserAccount.Role.ROLE_ADMIN
+                && (jobDetailDto.status()== Job.Status.DISQUALIFIED || jobDetailDto.status()== Job.Status.SHOW)
+                    && oldStatus== Job.Status.PENDING_APPROVAL
+        ){
+            //Notify to recruiter
+            String message = "Công việc '"+job.getTitle()+"' mà bạn đăng đã"+ (jobDetailDto.status()== Job.Status.DISQUALIFIED?" bị từ chối":" được phê duyệt");
+            String link = "/job/"+job.getId();
+            notificationService.addNotification(message, link ,job.getUser());
+            firebaseService.sendNotification(job.getUser().getId(), message);
         }
         Job updatedJob = jobRepository.save(job);
         return jobMapper.toDto(updatedJob);
