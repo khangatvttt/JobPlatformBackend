@@ -27,6 +27,8 @@ public record UserDto(
         @Pattern(regexp = "^\\d{10}$", message = "Phone number must be exactly 10 digits")
         String phone,
 
+        String avatarUrl,
+
         Long companyId,
 
         String companyName,
