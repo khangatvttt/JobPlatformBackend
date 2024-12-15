@@ -54,6 +54,7 @@ public class SecurityConfiguration {
                     .requestMatchers(HttpMethod.GET,"/users").hasAnyAuthority(UserAccount.Role.ROLE_ADMIN.name())
                     .requestMatchers("/auth/**","/grantcode/**").permitAll()
                     .requestMatchers(HttpMethod.GET,"/jobs/**").permitAll()
+                    .requestMatchers(HttpMethod.GET,"/companies/**").permitAll()
                     .requestMatchers("/momo-payment/**").permitAll()
                     .anyRequest().authenticated())
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
