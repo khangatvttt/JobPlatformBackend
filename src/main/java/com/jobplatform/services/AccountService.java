@@ -1,25 +1,34 @@
 package com.jobplatform.services;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.jobplatform.models.Company;
 import com.jobplatform.models.UserAccount;
 import com.jobplatform.models.dto.LoginDto;
 import com.jobplatform.models.dto.LoginTokenDto;
+import com.jobplatform.models.dto.UserDto;
+import com.jobplatform.models.dto.UserMapper;
+import com.jobplatform.repositories.CompanyRepository;
 import com.jobplatform.repositories.UserRepository;
 import io.jsonwebtoken.JwtException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.SneakyThrows;
 import org.apache.coyote.BadRequestException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.http.*;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
+
 import java.time.LocalDateTime;
-import java.util.NoSuchElementException;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -30,23 +39,32 @@ public class AccountService {
     private final JwtService jwtService;
     private final JavaMailSender mailSender;
     private final PasswordEncoder passwordEncoder;
+    private final UserMapper userMapper;
+    private final CompanyRepository companyRepository;
     private final String baseURL_Frontend = "http://localhost:3000";
+    private final String defaultAvatar = "https://firebasestorage.googleapis.com/v0/b/hotel-management-db2db.appspot.com/o/avatar-default.jpg?alt=media&token=1785bd27-d3da-4625-a4f8-87c706f73ce2";
+    @Value("${spring.security.oauth2.client.registration.google.client-id}")
+    private String clientId;
+    @Value("${spring.security.oauth2.client.registration.google.client-secret}")
+    private String clientSecret;
 
     public AccountService(UserRepository userRepository,
                           AuthenticationManager authenticationManager,
                           JwtService jwtService,
                           JavaMailSender mailSender,
-                          PasswordEncoder passwordEncoder) {
+                          PasswordEncoder passwordEncoder, UserMapper userMapper, CompanyRepository companyRepository) {
         this.userRepository = userRepository;
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
         this.passwordEncoder = passwordEncoder;
         this.mailSender = mailSender;
+        this.userMapper = userMapper;
+        this.companyRepository = companyRepository;
     }
 
     @SneakyThrows
-    public void signUp(UserAccount userAccount, String baseUrl){
-        Optional<UserAccount> userOpt = userRepository.findByEmail(userAccount.getEmail());
+    public void signUp(UserDto userDto, String baseUrl){
+        Optional<UserAccount> userOpt = userRepository.findByEmail(userDto.email());
         if (userOpt.isPresent()) {
             // This email has been used to activate account
             if (userOpt.get().getIsActive()) {
@@ -57,13 +75,109 @@ public class AccountService {
                 userRepository.delete(userOpt.get());
             }
         }
+
+        UserAccount userAccount = userMapper.toEntity(userDto);
+
+
         userAccount.setIsNonLocked(true);
         userAccount.setIsActive(false);
+        userAccount.setCreatedAt(LocalDateTime.now());
+        userAccount.setAvatarUrl(defaultAvatar);
         userAccount.setPassword(passwordEncoder.encode(userAccount.getPassword()));
+
+
+
+        if (userAccount.getRole() == UserAccount.Role.ROLE_ADMIN ||
+                userAccount.getRole() == UserAccount.Role.ROLE_RECRUITER){
+            userAccount.setIsNonLocked(false);
+        }
+
+        if (userAccount.getRole() == UserAccount.Role.ROLE_RECRUITER){
+            Company company = companyRepository.findById(userDto.companyId())
+                    .orElseThrow(()->new NoSuchElementException("Company with id "+ userDto.companyId()+ " is not found"));
+            userAccount.setCompany(company);
+            userAccount.setAvailableJobPosts(3);
+        }
+
         sendVerifyMail(userAccount, baseUrl);
         userRepository.save(userAccount);
 
     }
+
+    public LoginTokenDto processGrantCode(String code) {
+        String accessToken = getOauthAccessTokenGoogle(code);
+
+        return getProfileDetailsGoogle(accessToken);
+    }
+
+    private LoginTokenDto getProfileDetailsGoogle(String accessToken) {
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setBearerAuth(accessToken);
+
+        HttpEntity<String> requestEntity = new HttpEntity<>(httpHeaders);
+
+        String url = "https://www.googleapis.com/oauth2/v2/userinfo";
+        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, requestEntity, String.class);
+        JsonObject jsonObject = new Gson().fromJson(response.getBody(), JsonObject.class);
+
+        String email = jsonObject.get("email").toString().replace("\"", "");
+        String name = jsonObject.get("name").toString().replace("\"", "");
+
+
+        Optional<UserAccount> userOptional = userRepository.findByEmail(email);
+        UserAccount user;
+        if (userOptional.isEmpty()){
+            // Create account if user hasn't sign up yet
+            UserAccount newUser = new UserAccount();
+            newUser.setFullName(name);
+            newUser.setEmail(email);
+            newUser.setIsActive(true);
+            newUser.setRole(UserAccount.Role.ROLE_JOB_SEEKER);
+            newUser.setIsNonLocked(true);
+            newUser.setPassword(UUID.randomUUID()+"Salt1");
+            user = userRepository.save(newUser);
+        }
+        else {
+            // User has sign up, get their account
+            user = userOptional.get();
+        }
+
+        String jwtAccessToken = jwtService.generateToken(JwtService.TokenType.ACCESS_TOKEN,user);
+        String jwtRefreshToken = jwtService.generateRefreshToken(user);
+
+        user.setRefreshToken(jwtRefreshToken);
+        userRepository.save(user);
+
+        return new LoginTokenDto(jwtAccessToken,jwtRefreshToken);
+    }
+
+    private String getOauthAccessTokenGoogle(String code) {
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("code", code);
+        params.add("redirect_uri", "http://localhost:5173/loginGoogle");
+        params.add("client_id", clientId);
+        params.add("client_secret", clientSecret);
+        params.add("grant_type", "authorization_code");
+
+        HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(params, httpHeaders);
+
+        String url = "https://oauth2.googleapis.com/token";
+
+        // Get the response as a Map to extract the access token
+        Map<String, Object> response = restTemplate.postForObject(url, requestEntity, Map.class);
+
+        if (response == null || !response.containsKey("access_token")) {
+            throw new IllegalStateException("Failed to retrieve access token from Google");
+        }
+
+        return response.get("access_token").toString();
+    }
+
 
     public LoginTokenDto login(LoginDto loginDto) {
         authenticationManager.authenticate(
