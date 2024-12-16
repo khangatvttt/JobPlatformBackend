@@ -17,9 +17,9 @@ public class FirebaseConfig {
     public FirebaseApp firebaseApp() throws IOException {
         // Load the service account key from src/main/resources
 //        GoogleCredentials credentials = GoogleCredentials.fromStream(
-//                new ClassPathResource("firebase-key.json").getInputStream()
+//                new ClassPathResource("firebase.json").getInputStream()
 //        );
-        GoogleCredentials credentials = GoogleCredentials.fromStream(new FileInputStream("etc/secrets/firebase-key.json"));
+        GoogleCredentials credentials = GoogleCredentials.fromStream(new FileInputStream("/etc/secrets/firebase-key.json"));
 
         FirebaseOptions options = FirebaseOptions.builder()
                 .setCredentials(credentials)

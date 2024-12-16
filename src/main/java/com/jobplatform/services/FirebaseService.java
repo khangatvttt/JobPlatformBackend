@@ -19,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 
 import javax.naming.NoPermissionException;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLEncoder;
@@ -59,8 +60,8 @@ public class FirebaseService {
         BlobId blobId = BlobId.of(firebaseBucket, fileName);
         BlobInfo blobInfo = BlobInfo.newBuilder(blobId).setContentType(file.getContentType()).build();
 
-        InputStream credentialsStream = FirebaseService.class.getClassLoader().getResourceAsStream("firebase-key.json");
-        Credentials credentials = GoogleCredentials.fromStream(credentialsStream);
+//        InputStream credentialsStream = FirebaseService.class.getClassLoader().getResourceAsStream("firebase.json");
+        Credentials credentials = GoogleCredentials.fromStream(new FileInputStream("/etc/secrets/firebase-key.json"));
         Storage storage = StorageOptions.newBuilder().setCredentials(credentials).build().getService();
 
         storage.create(blobInfo, file.getInputStream());
