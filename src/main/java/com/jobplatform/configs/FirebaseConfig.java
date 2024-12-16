@@ -19,7 +19,7 @@ public class FirebaseConfig {
 //        GoogleCredentials credentials = GoogleCredentials.fromStream(
 //                new ClassPathResource("firebase-key.json").getInputStream()
 //        );
-        GoogleCredentials credentials = GoogleCredentials.fromStream(new FileInputStream("/etc/secrets/firebase-key.json"));
+        GoogleCredentials credentials = GoogleCredentials.fromStream(new FileInputStream("etc/secrets/firebase-key.json"));
 
         FirebaseOptions options = FirebaseOptions.builder()
                 .setCredentials(credentials)
