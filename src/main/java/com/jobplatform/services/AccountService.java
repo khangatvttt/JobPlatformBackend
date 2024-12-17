@@ -41,7 +41,7 @@ public class AccountService {
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
     private final CompanyRepository companyRepository;
-    private final String baseURL_Frontend = "http://localhost:3000";
+    private final String baseURL_Frontend = "https://jobplatformfrontend.onrender.com";
     private final String defaultAvatar = "https://firebasestorage.googleapis.com/v0/b/hotel-management-db2db.appspot.com/o/avatar-default.jpg?alt=media&token=1785bd27-d3da-4625-a4f8-87c706f73ce2";
     @Value("${spring.security.oauth2.client.registration.google.client-id}")
     private String clientId;
@@ -99,7 +99,7 @@ public class AccountService {
             userAccount.setAvailableJobPosts(3);
         }
 
-        sendVerifyMail(userAccount, baseUrl);
+        sendVerifyMail(userAccount);
         userRepository.save(userAccount);
 
     }
@@ -290,7 +290,7 @@ public class AccountService {
     }
 
     @SneakyThrows
-    public void sendVerifyMail(UserAccount user, String baseURL){
+    public void sendVerifyMail(UserAccount user){
         String senderName = "Job Platform Website";
         String from = "JobPlatformWebsite@gmail.com";
         String subject = "Xác nhận email";
@@ -306,10 +306,9 @@ public class AccountService {
         helper.setFrom(from,senderName);
         helper.setTo(user.getEmail());
         helper.setSubject(subject);
-        baseURL = "http://"+ baseURL;
 
         content = content.replace("[[name]]", user.getFullName());
-        String verifyURL = baseURL + "/auth/verify-email?token=" + jwtService.generateToken(JwtService.TokenType.VERIFICATION_TOKEN,user);
+        String verifyURL = baseURL_Frontend + "/auth/verify-email?token=" + jwtService.generateToken(JwtService.TokenType.VERIFICATION_TOKEN,user);
         content = content.replace("[[URL]]", verifyURL);
 
         helper.setText(content, true);
