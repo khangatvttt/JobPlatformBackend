@@ -50,8 +50,8 @@ public class MomoPaymentController {
 
             // Payment information
             String orderInfo = "Buy more recruitment news for account "+account;
-            String redirectUrl = "http://localhost:5173/momo-payment/verify";
-            String ipnUrl = "http://localhost:5173/momo-payment/verify";
+            String redirectUrl = "https://jobplatformfrontend.onrender.com/momo-payment/verify";
+            String ipnUrl = "https://jobplatformfrontend.onrender.com/momo-payment/verify";
             String requestType = "payWithMethod";
             String extraData = account;
             String orderGroupId = "";

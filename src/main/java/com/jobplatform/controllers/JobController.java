@@ -11,6 +11,7 @@ import lombok.SneakyThrows;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -46,7 +47,7 @@ public class JobController {
                                                           @RequestParam(required = false) Long userId,
                                                           @RequestParam(required = false) String industry,
                                                           @RequestParam(required = false) String address) {
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "deadline"));
         Page<Job> jobs = jobService.findAllJobs(pageable, title, related, status, userId, industry, address);
         List<JobDetailDto> listJobs = jobs.getContent().stream().map(jobMapper::toDto).toList();
 
