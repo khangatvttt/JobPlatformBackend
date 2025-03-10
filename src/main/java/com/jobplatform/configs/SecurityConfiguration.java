@@ -56,6 +56,8 @@ public class SecurityConfiguration {
                     .requestMatchers(HttpMethod.POST,"/companies/**").permitAll()
                     .requestMatchers(HttpMethod.GET,"/companies/**").permitAll()
                     .requestMatchers("/momo-payment/**").permitAll()
+                    .requestMatchers("/ws/**", "/ws").permitAll()
+                    .requestMatchers("/chat/**").permitAll()
                     .anyRequest().authenticated())
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
@@ -65,11 +67,12 @@ public class SecurityConfiguration {
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        configuration.setAllowedOrigins(List.of("*"));
-        configuration.setAllowedMethods(List.of("*"));
+        configuration.setAllowedOrigins(List.of("http://localhost:5173")); // Replace with your frontend URL
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization","Content-Type"));
 
         configuration.setExposedHeaders(List.of("X-Total-Pages","X-Total-Elements"));
+        configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 

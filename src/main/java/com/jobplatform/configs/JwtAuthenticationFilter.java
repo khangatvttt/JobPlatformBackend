@@ -41,6 +41,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         whitelist.add(new WhitelistEntry("/auth", null));          // Allow all methods for /auth
         whitelist.add(new WhitelistEntry("/jobs", "GET"));
         whitelist.add(new WhitelistEntry("/momo-payment", null));
+        whitelist.add(new WhitelistEntry("/ws", null));
     }
 
     @Override
