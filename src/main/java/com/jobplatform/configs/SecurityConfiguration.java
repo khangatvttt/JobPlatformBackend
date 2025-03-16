@@ -36,7 +36,6 @@ public class SecurityConfiguration {
                     .requestMatchers(HttpMethod.DELETE,"/jobs/**").hasAnyAuthority(UserAccount.Role.ROLE_RECRUITER.name(), UserAccount.Role.ROLE_ADMIN.name())
                     .requestMatchers(HttpMethod.POST,"/jobs/**").hasAnyAuthority(UserAccount.Role.ROLE_RECRUITER.name())
                     .requestMatchers(HttpMethod.POST,"/applications/**").hasAnyAuthority(UserAccount.Role.ROLE_JOB_SEEKER.name())
-                    .requestMatchers(HttpMethod.GET,"/applications").hasAnyAuthority(UserAccount.Role.ROLE_RECRUITER.name(), UserAccount.Role.ROLE_ADMIN.name())
                     .requestMatchers(HttpMethod.DELETE,"/applications").hasAnyAuthority(UserAccount.Role.ROLE_JOB_SEEKER.name(), UserAccount.Role.ROLE_ADMIN.name())
                     .requestMatchers(HttpMethod.DELETE,"/companies/**").hasAnyAuthority(UserAccount.Role.ROLE_RECRUITER.name(), UserAccount.Role.ROLE_ADMIN.name())
                     .requestMatchers(HttpMethod.PATCH,"/companies/**").hasAnyAuthority(UserAccount.Role.ROLE_RECRUITER.name(), UserAccount.Role.ROLE_ADMIN.name())

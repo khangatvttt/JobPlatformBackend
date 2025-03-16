@@ -74,7 +74,12 @@ public class ApplicationService {
         return applicationMapper.toDto(applicationRepository.save(application));
     }
 
+    @SneakyThrows
     public List<ApplicationDto> findAllApplications(Long jobId, String status, String name, String phone, String email, Long recruiterId) {
+        UserAccount userAccount = (UserAccount) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (userAccount.getRole().equals(UserAccount.Role.ROLE_JOB_SEEKER) && !userAccount.getEmail().equals(email)) {
+            throw new NoPermissionException();
+        }
         Application.Status applicationStatus = status != null ? Application.Status.valueOf(status) : null;
         return applicationRepository.findAll(filterApplication(name, email, phone, jobId, applicationStatus, recruiterId))
                 .stream()

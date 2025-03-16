@@ -3,6 +3,7 @@ package com.jobplatform.controllers;
 import com.jobplatform.models.ChatMessage;
 import com.jobplatform.models.dto.ChatMessageDto;
 import com.jobplatform.models.dto.ChatMessageMapper;
+import com.jobplatform.models.dto.UserDto;
 import com.jobplatform.services.ChatMessageService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -43,16 +44,21 @@ public class ChatMessageController {
 
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> findCompanyById(@PathVariable Long id){
+    public ResponseEntity<Void> deleteMessage(@PathVariable Long id){
         chatMessageService.deleteMessage(id);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<Void> deleteCompany(@PathVariable Long id,
+    public ResponseEntity<Void> editMessage(@PathVariable Long id,
                                                 @RequestBody Map<String, String> payload){
         chatMessageService.editMessage(id, payload.get("content"));
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @GetMapping("/receiver")
+    public ResponseEntity<List<UserDto>> getAllReceiver() {
+        return new ResponseEntity<>(chatMessageService.getAllReceiver(),HttpStatus.OK);
     }
 
 }

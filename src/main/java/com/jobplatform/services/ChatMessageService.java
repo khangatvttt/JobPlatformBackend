@@ -3,7 +3,10 @@ package com.jobplatform.services;
 import com.jobplatform.models.ChatMessage;
 import com.jobplatform.models.UserAccount;
 import com.jobplatform.models.dto.Message;
+import com.jobplatform.models.dto.UserDto;
+import com.jobplatform.models.dto.UserMapper;
 import com.jobplatform.repositories.ChatMessageRepository;
+import com.jobplatform.repositories.UserRepository;
 import lombok.SneakyThrows;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -12,15 +15,23 @@ import org.springframework.stereotype.Service;
 
 import javax.naming.NoPermissionException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.NoSuchElementException;
+
+import static java.util.stream.Collectors.toList;
 
 @Service
 public class ChatMessageService {
 
     private final ChatMessageRepository chatMessageRepository;
+    private final UserRepository userRepository;
+    private final UserMapper userMapper;
 
-    public ChatMessageService(ChatMessageRepository chatMessageRepository) {
+    public ChatMessageService(ChatMessageRepository chatMessageRepository, UserRepository userRepository, UserMapper userMapper) {
         this.chatMessageRepository = chatMessageRepository;
+        this.userRepository = userRepository;
+        this.userMapper = userMapper;
     }
 
     public void createMessage(Message message) {
@@ -63,5 +74,22 @@ public class ChatMessageService {
         }
         chatMessage.setContent(content);
         chatMessageRepository.save(chatMessage);
+    }
+
+    @SneakyThrows
+    public List<UserDto> getAllReceiver() {
+        UserAccount userAccount = (UserAccount) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        List<ChatMessage> listChatMessage = chatMessageRepository.findDistinctBySenderOrderByCreatedAt(userAccount.getEmail());
+        List<String> listReceiverFind = listChatMessage.stream().map(ChatMessage::getReceiver).toList();
+        List<String> listReceiver = listReceiverFind.stream()
+                .distinct()
+                .toList();
+        List<UserDto> result = new ArrayList<>();
+        for (String userEmail : listReceiver) {
+            UserAccount user = userRepository.findByEmail(userEmail).get();
+            UserDto userDto = userMapper.toDto(user);
+            result.add(userDto);
+        }
+        return result;
     }
 }
