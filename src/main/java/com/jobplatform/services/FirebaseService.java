@@ -182,6 +182,24 @@ public class FirebaseService {
         }
     }
 
+    public void sendNotification(String userEmail, String messageContent) {
+        Long userId = userRepository.findByEmail(userEmail).orElseThrow(() -> new NoSuchElementException("User not found")).getId();
+        List<String> tokenList = tokenFirebaseService.getToken(userId);
+        for (String token : tokenList) {
+            Message message = Message.builder()
+                    .putData("message", messageContent)
+                    .setToken(token)
+                    .build();
+
+            try {
+                String response = FirebaseMessaging.getInstance().send(message);
+                System.out.println("Successfully sent message: " + response);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
 
 }
 
