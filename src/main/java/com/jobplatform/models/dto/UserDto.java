@@ -33,6 +33,8 @@ public record UserDto(
 
         String companyName,
 
+        String companyImage,
+
         String businessLicense,
 
         Boolean isActive,

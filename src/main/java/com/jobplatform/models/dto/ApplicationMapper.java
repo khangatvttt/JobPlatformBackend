@@ -11,7 +11,11 @@ public interface ApplicationMapper {
 
     @Mappings({
             @Mapping(source = "job.id", target = "jobId"),
-            @Mapping(source = "user.id", target = "userId")
+            @Mapping(source = "user.id", target = "userId"),
+            @Mapping(source = "job.user.company.name", target = "companyName"),
+            @Mapping(source = "job.user.fullName", target = "recruiterName"),
+            @Mapping(source = "job.user.company.images", target = "companyImage"),
+            @Mapping(source = "job.user.email", target = "recruiterEmail")
     })
     ApplicationDto toDto(Application application);
 

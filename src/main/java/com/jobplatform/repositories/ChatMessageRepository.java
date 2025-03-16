@@ -14,6 +14,6 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> 
     @Query("SELECT m FROM ChatMessage m WHERE (m.sender = :userA AND m.receiver = :userB) OR (m.sender = :userB AND m.receiver = :userA) ORDER BY m.createdAt ASC")
     Page<ChatMessage> findChatHistory(@Param("userA") String userA, @Param("userB") String userB, Pageable pageable);
 
-    List<ChatMessage> findDistinctBySenderOrderByCreatedAt(String sender);
+    List<ChatMessage> findDistinctBySenderOrReceiverOrderByCreatedAt(String sender, String receiver);
 
 }

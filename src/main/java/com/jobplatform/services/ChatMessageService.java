@@ -79,11 +79,16 @@ public class ChatMessageService {
     @SneakyThrows
     public List<UserDto> getAllReceiver() {
         UserAccount userAccount = (UserAccount) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        List<ChatMessage> listChatMessage = chatMessageRepository.findDistinctBySenderOrderByCreatedAt(userAccount.getEmail());
-        List<String> listReceiverFind = listChatMessage.stream().map(ChatMessage::getReceiver).toList();
-        List<String> listReceiver = listReceiverFind.stream()
+        List<ChatMessage> listChatMessage = chatMessageRepository.findDistinctBySenderOrReceiverOrderByCreatedAt(userAccount.getEmail(), userAccount.getEmail());
+        List<String> listReceiverFind = new ArrayList<>();
+        for (ChatMessage message : listChatMessage) {
+            listReceiverFind.add(message.getReceiver());
+            listReceiverFind.add(message.getSender());
+        }
+        List<String> listReceiver = new ArrayList<>(listReceiverFind.stream()
                 .distinct()
-                .toList();
+                .toList());
+        listReceiver.remove(userAccount.getEmail());
         List<UserDto> result = new ArrayList<>();
         for (String userEmail : listReceiver) {
             UserAccount user = userRepository.findByEmail(userEmail).get();
