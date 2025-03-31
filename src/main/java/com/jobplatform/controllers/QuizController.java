@@ -36,6 +36,11 @@ public class QuizController {
         return ResponseEntity.ok(quizService.getAllQuizAttempt());
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<QuizAttemptAnswerDto> getQuizAttempts(@PathVariable Long id) {
+        return ResponseEntity.ok(quizService.getQuizAttempt(id));
+    }
+
     // Submit quiz
     @PostMapping("/{quizAttemptId}/submit")
     public ResponseEntity<String> submitQuiz(@PathVariable Long quizAttemptId) {

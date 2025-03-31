@@ -134,6 +134,16 @@ public class QuizService {
         return quizAttemptList.stream().map(quizAttemptMapper::toAnswerDto).toList();
     }
 
+    @SneakyThrows
+    public QuizAttemptAnswerDto getQuizAttempt(Long id) {
+        UserAccount userAccount = (UserAccount) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        QuizAttempt quiz = quizAttemptRepository.findById(id).orElseThrow(()-> new NoSuchElementException("Quiz not found"));
+        if (quiz.getUser().getId().equals(userAccount.getId())) {
+            throw new NoPermissionException("No permission");
+        }
+        return quizAttemptMapper.toAnswerDto(quiz);
+    }
+
     public void saveAnswer(UserAnswerDto userAnswerDto) {
         UserAnswer userAnswer = userAnswerRepository.findByQuizAttempt_IdAndQuestion_Id(userAnswerDto.quizAttemptId(), userAnswerDto.questionId())
                 .orElseThrow(() -> new NoSuchElementException("Wrong quiz attempt Id or question Id"));
