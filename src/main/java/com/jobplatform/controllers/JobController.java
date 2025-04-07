@@ -2,6 +2,7 @@ package com.jobplatform.controllers;
 
 import com.jobplatform.models.Job;
 import com.jobplatform.models.UserAccount;
+import com.jobplatform.models.dto.CvScore;
 import com.jobplatform.models.dto.JobDetailDto;
 import com.jobplatform.models.dto.JobMapper;
 import com.jobplatform.models.dto.UpdateJobDto;
@@ -74,6 +75,11 @@ public class JobController {
     public ResponseEntity<String> deleteJob(@PathVariable Long id) {
         jobService.deleteJob(id);
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}/best-cv")
+    public ResponseEntity<List<CvScore>> getBestCvMatch(@PathVariable Long id, @RequestParam int limit) {
+        return new ResponseEntity<>(jobService.findBestCvMatchesForJob(id, limit), HttpStatus.OK);
     }
 
 }

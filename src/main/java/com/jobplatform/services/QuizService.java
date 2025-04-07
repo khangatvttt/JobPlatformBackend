@@ -138,7 +138,7 @@ public class QuizService {
     public QuizAttemptAnswerDto getQuizAttempt(Long id) {
         UserAccount userAccount = (UserAccount) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         QuizAttempt quiz = quizAttemptRepository.findById(id).orElseThrow(()-> new NoSuchElementException("Quiz not found"));
-        if (quiz.getUser().getId().equals(userAccount.getId())) {
+        if (!quiz.getUser().getId().equals(userAccount.getId())) {
             throw new NoPermissionException("No permission");
         }
         return quizAttemptMapper.toAnswerDto(quiz);

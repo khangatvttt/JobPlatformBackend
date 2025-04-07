@@ -35,6 +35,9 @@ public class Job {
     private String description;
 
     @Column(columnDefinition = "Text")
+    private String requirement;
+
+    @Column(columnDefinition = "Text")
     private String workExperience;
 
     @Column(columnDefinition = "Text")
