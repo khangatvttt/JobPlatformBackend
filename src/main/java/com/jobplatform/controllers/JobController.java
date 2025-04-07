@@ -82,4 +82,10 @@ public class JobController {
         return new ResponseEntity<>(jobService.findBestCvMatchesForJob(id, limit), HttpStatus.OK);
     }
 
+    @PostMapping("/{id}/extends")
+    public ResponseEntity<Void> extendJob(@PathVariable Long id) {
+        jobService.extendExpireTimeJob(id);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
 }
