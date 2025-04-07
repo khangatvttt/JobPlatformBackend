@@ -69,6 +69,8 @@ public class Job {
 
     private Integer numberOfRecruits;
 
+    private LocalDateTime expiredTime;
+
     @JsonIgnore
     @OneToMany (mappedBy = "job", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<Application> applications;

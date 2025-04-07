@@ -66,6 +66,8 @@ public class UserAccount implements UserDetails {
 
     private LocalDateTime createdAt;
 
+    private Boolean isPremium;
+
     private Integer availableJobPosts;
 
     @Column(length = 2000)

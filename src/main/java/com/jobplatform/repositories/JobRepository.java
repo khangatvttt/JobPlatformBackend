@@ -16,6 +16,7 @@ import java.util.Optional;
 public interface JobRepository extends JpaRepository<Job, Long>, JpaSpecificationExecutor<Job> {
     Page<Job> findByUser_Company_Id(Long companyId, Pageable pageable);
     List<Job> findByUserId(Long userId);
+    List<Job> findByStatus(Job.Status status);
 
     long countByCreateAtBetween(LocalDateTime startDate, LocalDateTime endDate);
     @Query("SELECT j.industry, COUNT(j) AS jobCount " +

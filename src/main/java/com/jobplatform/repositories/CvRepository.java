@@ -12,4 +12,5 @@ import java.util.List;
 public interface CvRepository extends JpaRepository<Cv, Long>, PagingAndSortingRepository<Cv, Long> {
     Page<Cv> findByUserId(Long userId, Pageable pageable);
     List<Cv> findByUserId(Long userId);
+    List<Cv> findByStatus(Boolean status);
 }

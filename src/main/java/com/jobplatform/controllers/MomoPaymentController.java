@@ -44,12 +44,21 @@ public class MomoPaymentController {
             // Extract data from request body
             String amount = requestPayload.get("amount");
             String account = requestPayload.get("account");
+            String type = requestPayload.get("type");
 
             // Generate unique orderId and requestId
-            String orderId = PARTNER_CODE + System.currentTimeMillis();
+            String orderId;
+            String orderInfo;
+            if (type.equals("PREMIUM")) {
+                orderId = "PREMIUM" + System.currentTimeMillis();
+                orderInfo = "Upgrade account " + account + " to premium account";
+
+            } else {
+                orderId = "JOB" + System.currentTimeMillis();
+                orderInfo = "Buy more recruitment news for account " + account;
+            }
 
             // Payment information
-            String orderInfo = "Buy more recruitment news for account "+account;
             String redirectUrl = "https://jobplatformfrontend.onrender.com/momo-payment/verify";
             String ipnUrl = "https://jobplatformfrontend.onrender.com/momo-payment/verify";
             String requestType = "payWithMethod";
@@ -144,13 +153,17 @@ public class MomoPaymentController {
                 //Success
                 if ("0".equals(resultCode)) {
                     UserAccount userAccount = userRepository.findByEmail(extraData).orElseThrow(()-> new NoSuchElementException("User not found"));
-                    Integer numberOfJobs = Integer.parseInt(amount) /100000;
-                    Integer currentNumberOfJobs = userAccount.getAvailableJobPosts()!=null?userAccount.getAvailableJobPosts():0;
-                    userAccount.setAvailableJobPosts(currentNumberOfJobs + numberOfJobs);
+                    if (orderId.startsWith("PREMIUM") && Integer.parseInt(amount) >= 100000) {
+                        userAccount.setIsPremium(true);
+                    } else {
+                        Integer numberOfJobs = Integer.parseInt(amount) /100000;
+                        Integer currentNumberOfJobs = userAccount.getAvailableJobPosts()!=null?userAccount.getAvailableJobPosts():0;
+                        userAccount.setAvailableJobPosts(currentNumberOfJobs + numberOfJobs);
+                    }
                     userRepository.save(userAccount);
                     return new ResponseEntity<>("Payment verified successfully",HttpStatus.OK);
                 } else {
-                    return new ResponseEntity<>("Payment fail. Result code: "+resultCode,HttpStatus.OK);
+                    return new ResponseEntity<>("Payment fail. Result code: " + resultCode, HttpStatus.OK);
                 }
             } else {
                 return new ResponseEntity<>("Invalid signature",HttpStatus.UNAUTHORIZED);

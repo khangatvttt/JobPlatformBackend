@@ -97,6 +97,7 @@ public class AccountService {
                     .orElseThrow(()->new NoSuchElementException("Company with id "+ userDto.companyId()+ " is not found"));
             userAccount.setCompany(company);
             userAccount.setAvailableJobPosts(3);
+            userAccount.setIsPremium(false);
         }
 
         sendVerifyMail(userAccount);
