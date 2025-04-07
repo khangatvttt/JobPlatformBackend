@@ -99,6 +99,7 @@ public class JobService {
     }
 
     // Update Job (partial update)
+    @SneakyThrows
     public JobDetailDto updateJob(Long id, UpdateJobDto jobDetailDto) {
         Job job = jobRepository.findById(id).orElseThrow(() -> new NoSuchElementException("Job with id: " + id +" is not found"));
         checkOwnership(job.getUser().getId());
@@ -107,6 +108,9 @@ public class JobService {
 
         UserAccount userAccount = (UserAccount) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
+        if (userAccount.getRole().equals(UserAccount.Role.ROLE_RECRUITER) && userAccount.getAvailableJobPosts() <= 0) {
+            throw new BadRequestException("Out of credit job post");
+        }
         jobMapper.updateJob(jobDetailDto, job);
 
         if (oldStatus == Job.Status.PENDING_APPROVAL && userAccount.getRole()!= UserAccount.Role.ROLE_ADMIN){
@@ -121,6 +125,11 @@ public class JobService {
             String link = "/job/"+job.getId();
             notificationService.addNotification(message, link ,job.getUser());
             firebaseService.sendNotification(job.getUser().getId(), message);
+        }
+        if (!userAccount.getRole().equals(UserAccount.Role.ROLE_ADMIN)) {
+            job.setExpiredTime(job.getExpiredTime().plusDays(30));
+            userAccount.setAvailableJobPosts(userAccount.getAvailableJobPosts() - 1);
+            userRepository.save(userAccount);
         }
         Job updatedJob = jobRepository.save(job);
         return jobMapper.toDto(updatedJob);
@@ -211,6 +220,19 @@ public class JobService {
                 .sorted(Comparator.comparingDouble(CvScore::score).reversed())
                 .limit(limit)
                 .collect(Collectors.toList());
+    }
+
+    @SneakyThrows
+    public void extendExpireTimeJob(Long jobId) {
+        UserAccount userAccount = (UserAccount) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (userAccount.getAvailableJobPosts() <= 0) {
+            throw new BadRequestException("Out of credit for job posts");
+        }
+        Job job = jobRepository.findById(jobId).orElseThrow(()-> new NoSuchElementException("Job not found"));
+        job.setExpiredTime(job.getExpiredTime().plusDays(30));
+        jobRepository.save(job);
+        userAccount.setAvailableJobPosts(userAccount.getAvailableJobPosts() - 1);
+        userRepository.save(userAccount);
     }
 
 

@@ -104,7 +104,7 @@ public class CvService {
         checkOwnership(cv.getUser().getId());
         List<Job> allJobs = jobRepository.findByStatus(Job.Status.SHOW);
         if (!cv.getUser().getIsPremium()) {
-            throw new NoPermissionException();
+            throw new NoPermissionException("Only ");
         }
         return allJobs.stream()
                 .map(job -> {
