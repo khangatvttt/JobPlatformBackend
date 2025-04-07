@@ -70,4 +70,16 @@ public class CvController {
     public ResponseEntity<List<JobScore>> findBestJob(@PathVariable Long id, @RequestParam int limit) {
         return new ResponseEntity<>(cvService.findMatchJob(id, limit), HttpStatus.OK);
     }
+
+    @PatchMapping("/{id}/turn-on")
+    public ResponseEntity<Void> turnOnCv(@PathVariable Long id) {
+        cvService.turnOnCv(id);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PatchMapping("/{id}/turn-off")
+    public ResponseEntity<Void> turnOffCv(@PathVariable Long id) {
+        cvService.turnOffCv(id);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }

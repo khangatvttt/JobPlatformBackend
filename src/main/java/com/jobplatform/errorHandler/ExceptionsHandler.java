@@ -113,7 +113,7 @@ public class ExceptionsHandler {
         Map<String, Object> errors = new LinkedHashMap<>();
         errors.put("timestamp", LocalDateTime.now());
         errors.put("status","Unauthorized");
-        errors.put("error", "You don't have permission to do this action");
+        errors.put("error", ex.getMessage());
         return new ResponseEntity<>(errors, HttpStatus.FORBIDDEN);
     }
 

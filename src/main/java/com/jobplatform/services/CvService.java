@@ -21,6 +21,7 @@ import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -46,6 +47,7 @@ public class CvService {
         cv.setId(null);
         cv.setUser(userAccount);
         cv.setCreatedAt(LocalDateTime.now());
+        cv.setStatus(false);
         return cvRepository.save(cv);
     }
 
@@ -71,17 +73,39 @@ public class CvService {
         return cvRepository.save(existingCv);
     }
 
+    public void turnOnCv(Long cvId) {
+        Cv updateCv = cvRepository.findById(cvId).orElseThrow(() -> new NoSuchElementException("CV with id " + cvId + " not found"));
+        checkOwnership(updateCv.getUser().getId());
+        UserAccount userAccount = (UserAccount) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        List<Cv> cvList = cvRepository.findByUserId(userAccount.getId());
+        for (Cv eachCv : cvList) {
+            eachCv.setStatus(Objects.equals(eachCv.getId(), cvId));
+        }
+        cvRepository.saveAll(cvList);
+    }
+
+    public void turnOffCv(Long cvId) {
+        Cv updateCv = cvRepository.findById(cvId).orElseThrow(() -> new NoSuchElementException("CV with id " + cvId + " not found"));
+        checkOwnership(updateCv.getUser().getId());
+        updateCv.setStatus(false);
+        cvRepository.save(updateCv);
+    }
+
     public void deleteCv(Long cvId){
         Cv existingCv = cvRepository.findById(cvId).orElseThrow(() -> new NoSuchElementException("CV with id " + cvId + " not found"));
         checkOwnership(existingCv.getUser().getId());
         cvRepository.delete(existingCv);
     }
 
+    @SneakyThrows
     public List<JobScore> findMatchJob(Long cvId, int limit) {
         Cv cv = cvRepository.findById(cvId).orElseThrow(() -> new NoSuchElementException("CV not found"));
         checkOwnership(cv.getUser().getId());
-        List<Job> allJobs = jobRepository.findAll();
-
+        List<Job> allJobs = jobRepository.findByStatus(Job.Status.SHOW);
+        if (!cv.getUser().getIsPremium()) {
+            throw new NoPermissionException();
+        }
         return allJobs.stream()
                 .map(job -> {
                     double score = jobService.matchCvToJob(job, cv);

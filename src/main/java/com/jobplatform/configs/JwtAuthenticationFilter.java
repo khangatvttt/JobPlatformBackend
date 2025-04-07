@@ -52,7 +52,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     ) throws ServletException, IOException {
 
         //Not filter the /auth endpoint
-        if (isWhitelisted(request)) {
+        if (isWhitelisted(request) && !request.getRequestURI().contains("best")) {
             filterChain.doFilter(request, response);
             return;
         }

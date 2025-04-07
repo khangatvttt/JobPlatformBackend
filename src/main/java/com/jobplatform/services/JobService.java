@@ -65,6 +65,7 @@ public class JobService {
         Job job = jobMapper.toEntity(jobDetailDto);
 
         job.setCreateAt(LocalDateTime.now());
+        job.setExpiredTime(LocalDateTime.now().plusDays(30));
         job.setUser(userAccount);
         job.setStatus(Job.Status.PENDING_APPROVAL);
 
@@ -169,6 +170,8 @@ public class JobService {
                 predicates.add(criteriaBuilder.equal(root.get("address"), address));
             }
 
+            predicates.add(criteriaBuilder.greaterThan(root.get("expiredTime"), LocalDateTime.now()));
+
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         };
     }
@@ -193,13 +196,17 @@ public class JobService {
         return Math.round(match * 10000.0) / 100.0;
     }
 
+    @SneakyThrows
     public List<CvScore> findBestCvMatchesForJob(Long jobId, int limit) {
         Job job = jobRepository.findById(jobId)
                 .orElseThrow(() -> new NoSuchElementException("Job not found"));
         checkOwnership(job.getUser().getId());
-        List<Cv> allCvs = cvRepository.findAll();
+        if (!job.getUser().getIsPremium()) {
+            throw new NoPermissionException("Only premium account");
+        }
+        List<Cv> allCvs = cvRepository.findByStatus(true);
 
-        return allCvs.parallelStream()
+        return allCvs.stream()
                 .map(cv -> new CvScore(cv, matchCvToJob(job, cv)))
                 .sorted(Comparator.comparingDouble(CvScore::score).reversed())
                 .limit(limit)
