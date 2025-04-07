@@ -2,6 +2,7 @@ package com.jobplatform.controllers;
 
 import com.jobplatform.models.Cv;
 import com.jobplatform.models.dto.CvDto;
+import com.jobplatform.models.dto.JobScore;
 import com.jobplatform.services.CvService;
 import com.jobplatform.services.GeminiAIService;
 import jakarta.validation.Valid;
@@ -63,5 +64,10 @@ public class CvController {
     @GetMapping("/{id}/evaluation")
     public ResponseEntity<Map<String, Object>> evaluateCv(@PathVariable Long id) {
         return new ResponseEntity<>(geminiAIService.analyzeCv(id),HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}/best-job")
+    public ResponseEntity<List<JobScore>> findBestJob(@PathVariable Long id, @RequestParam int limit) {
+        return new ResponseEntity<>(cvService.findMatchJob(id, limit), HttpStatus.OK);
     }
 }

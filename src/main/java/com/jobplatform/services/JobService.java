@@ -1,14 +1,14 @@
 package com.jobplatform.services;
 
-import com.jobplatform.models.Company;
+import com.jobplatform.models.Cv;
 import com.jobplatform.models.Job;
 import com.jobplatform.models.UserAccount;
-import com.jobplatform.models.dto.JobDetailDto;
-import com.jobplatform.models.dto.JobMapper;
-import com.jobplatform.models.dto.UpdateJobDto;
-import com.jobplatform.repositories.CompanyRepository;
+import com.jobplatform.models.dto.*;
+import com.jobplatform.repositories.CvRepository;
 import com.jobplatform.repositories.JobRepository;
 import com.jobplatform.repositories.UserRepository;
+import com.jobplatform.utils.NormalizerUtils;
+import com.jobplatform.utils.TextSimilarityUtils;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
 import lombok.SneakyThrows;
@@ -17,7 +17,6 @@ import org.hibernate.Hibernate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,25 +24,27 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.naming.NoPermissionException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 
 @Service
 public class JobService {
     private final JobRepository jobRepository;
     private final UserRepository userRepository;
-    private final CompanyRepository companyRepository;
     private final JobMapper jobMapper;
     private final NotificationService notificationService;
     private final FirebaseService firebaseService;
+    private final CvRepository cvRepository;
 
-    public JobService(JobRepository jobRepository, UserRepository userRepository, CompanyRepository companyRepository, JobMapper jobMapper, NotificationService notificationService, FirebaseService firebaseService) {
+    public JobService(JobRepository jobRepository, UserRepository userRepository, JobMapper jobMapper, NotificationService notificationService, FirebaseService firebaseService, CvRepository cvRepository) {
         this.jobRepository = jobRepository;
         this.userRepository = userRepository;
-        this.companyRepository = companyRepository;
         this.jobMapper = jobMapper;
         this.notificationService = notificationService;
         this.firebaseService = firebaseService;
+        this.cvRepository = cvRepository;
     }
 
     // Create a new job
@@ -170,6 +171,39 @@ public class JobService {
 
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         };
+    }
+
+    public double matchCvToJob(Job job, Cv cv) {
+        double positionMatchScore = TextSimilarityUtils.cosineSimilarity(cv.getJobPosition(), job.getTitle());
+        double experienceMatchScore = TextSimilarityUtils.cosineSimilarity(cv.getWorkExperience(), job.getDescription());
+        double skillsMatchScore = TextSimilarityUtils.jaccardSimilarity(cv.getSkills(), job.getRequirement());
+        double languageMatchScore = TextSimilarityUtils.cosineSimilarity(cv.getLanguageSkill(), job.getRequirement());
+        double levelMatchScore = NormalizerUtils.normalizeLevel(cv.getJobPosition(), job.getLevel()) ? 1.0 : 0.0;
+        double industryMatchScore = NormalizerUtils.normalizeIndustry(cv.getJobPosition(), job.getIndustry()) ? 1.0 : 0.0;
+
+        // Weighted scoring
+        double match =
+                positionMatchScore * 0.2 +
+                experienceMatchScore * 0.1 +
+                skillsMatchScore * 0.25 +
+                languageMatchScore * 0.2 +
+                levelMatchScore * 0.1 +
+                industryMatchScore * 0.15;
+
+        return Math.round(match * 10000.0) / 100.0;
+    }
+
+    public List<CvScore> findBestCvMatchesForJob(Long jobId, int limit) {
+        Job job = jobRepository.findById(jobId)
+                .orElseThrow(() -> new NoSuchElementException("Job not found"));
+        checkOwnership(job.getUser().getId());
+        List<Cv> allCvs = cvRepository.findAll();
+
+        return allCvs.parallelStream()
+                .map(cv -> new CvScore(cv, matchCvToJob(job, cv)))
+                .sorted(Comparator.comparingDouble(CvScore::score).reversed())
+                .limit(limit)
+                .collect(Collectors.toList());
     }
 
 
