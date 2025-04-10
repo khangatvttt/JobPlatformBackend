@@ -57,6 +57,9 @@ public class SecurityConfiguration {
                     .requestMatchers("/momo-payment/**").permitAll()
                     .requestMatchers("/ws/**", "/ws").permitAll()
                     .requestMatchers("/chat/**").permitAll()
+                    .requestMatchers(HttpMethod.POST, "/questions").hasAnyAuthority(UserAccount.Role.ROLE_ADMIN.name())
+                    .requestMatchers(HttpMethod.PATCH, "/questions").hasAnyAuthority(UserAccount.Role.ROLE_ADMIN.name())
+                    .requestMatchers(HttpMethod.DELETE, "/questions").hasAnyAuthority(UserAccount.Role.ROLE_ADMIN.name())
                     .anyRequest().authenticated())
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
