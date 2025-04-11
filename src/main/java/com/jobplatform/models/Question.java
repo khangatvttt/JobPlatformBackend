@@ -20,6 +20,8 @@ public class Question {
     @NotBlank
     private String content;
 
+    private String image;
+
     @ElementCollection
     @NotNull
     private List<String> answers;
