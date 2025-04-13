@@ -45,7 +45,9 @@ public class QuestionService {
         return questionRepository.save(existingQuestion);
     }
     public void deleteQuestion(Long id) {
-        questionRepository.deleteById(id);
+        Question existingQuestion = getQuestionById(id);
+        existingQuestion.setStatus(false);
+        questionRepository.save(existingQuestion);
     }
 }
 

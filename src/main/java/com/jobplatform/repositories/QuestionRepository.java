@@ -8,6 +8,6 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface QuestionRepository extends JpaRepository<Question, Long> {
-    @Query(value = "SELECT * FROM questions ORDER BY RAND() LIMIT :limit", nativeQuery = true)
+    @Query(value = "SELECT * FROM questions  WHERE status = true ORDER BY RAND() LIMIT :limit", nativeQuery = true)
     List<Question> findRandomQuestions(@Param("limit") int limit);
 }
