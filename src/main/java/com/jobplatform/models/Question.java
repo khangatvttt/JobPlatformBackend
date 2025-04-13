@@ -22,6 +22,8 @@ public class Question {
 
     private String image;
 
+    private boolean status;
+
     @ElementCollection
     @NotNull
     private List<String> answers;

@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import javax.naming.NoPermissionException;
 import java.time.LocalDateTime;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 
 @Service
@@ -46,5 +47,16 @@ public class NotificationService {
         }
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
         return notificationRepository.findByUserId(userId, pageable);
+    }
+
+    @SneakyThrows
+    public void markReadNotification(Long id, boolean isRead) {
+        UserAccount userAccount = (UserAccount) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Notification notification = notificationRepository.findById(id).orElseThrow(()->new NoSuchElementException("Notification not found"));
+        if (!notification.getUser().getId().equals(userAccount.getId())) {
+            throw new NoPermissionException("Can't modified other user notification");
+        }
+        notification.setIsRead(isRead);
+        notificationRepository.save(notification);
     }
 }
