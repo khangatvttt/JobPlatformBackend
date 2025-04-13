@@ -61,7 +61,7 @@ public class FirebaseService {
         BlobInfo blobInfo = BlobInfo.newBuilder(blobId).setContentType(file.getContentType()).build();
 
         InputStream credentialsStream = FirebaseService.class.getClassLoader().getResourceAsStream("firebase-key.json");
-       Credentials credentials = GoogleCredentials.fromStream(credentialsStream);
+        Credentials credentials = GoogleCredentials.fromStream(credentialsStream);
         Storage storage = StorageOptions.newBuilder().setCredentials(credentials).build().getService();
 
         storage.create(blobInfo, file.getInputStream());

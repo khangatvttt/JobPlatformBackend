@@ -41,6 +41,8 @@ public record UserDto(
 
         Boolean isNonLocked,
 
+        Boolean isPremium,
+
         Integer availableJobPosts,
 
         @NotNull
