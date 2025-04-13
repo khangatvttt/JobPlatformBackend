@@ -44,6 +44,7 @@ public interface QuizAttemptMapper {
                 .map(userAnswer -> new QuestionDto(
                         userAnswer.getQuestion().getId(),
                         userAnswer.getQuestion().getContent(),
+                        userAnswer.getQuestion().getImage(),
                         userAnswer.getQuestion().getAnswers(),
                         userAnswer.getQuestion().getCorrectAnswer(),
                         userAnswer.getSelectedAnswer(),

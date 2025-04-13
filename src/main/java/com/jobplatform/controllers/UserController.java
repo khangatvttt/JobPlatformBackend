@@ -98,5 +98,12 @@ public class UserController {
         tokenFirebaseService.addToken(token);
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
+    @PostMapping("/notifications/{id}")
+    public ResponseEntity<Void> markReadNotification(@PathVariable Long id, @RequestBody Map<String, Boolean> payload) {
+        boolean isRead = payload.get("isRead");
+        notificationService.markReadNotification(id, isRead);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }
 
