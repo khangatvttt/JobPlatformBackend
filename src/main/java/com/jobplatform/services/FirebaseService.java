@@ -60,8 +60,9 @@ public class FirebaseService {
         BlobId blobId = BlobId.of(firebaseBucket, fileName);
         BlobInfo blobInfo = BlobInfo.newBuilder(blobId).setContentType(file.getContentType()).build();
 
-        InputStream credentialsStream = FirebaseService.class.getClassLoader().getResourceAsStream("firebase-key.json");
-        Credentials credentials = GoogleCredentials.fromStream(credentialsStream);
+//        InputStream credentialsStream = FirebaseService.class.getClassLoader().getResourceAsStream("firebase-key.json");
+//        Credentials credentials = GoogleCredentials.fromStream(credentialsStream);
+        Credentials credentials = GoogleCredentials.fromStream(new FileInputStream("/etc/secrets/firebase-key.json"));
         Storage storage = StorageOptions.newBuilder().setCredentials(credentials).build().getService();
 
         storage.create(blobInfo, file.getInputStream());
@@ -115,10 +116,11 @@ public class FirebaseService {
 
     public List<String> getFilesByUserId(Long userId) {
         List<String> fileNames = new ArrayList<>();
-        InputStream credentialsStream = FirebaseService.class.getClassLoader().getResourceAsStream("firebase-key.json");
+//        InputStream credentialsStream = FirebaseService.class.getClassLoader().getResourceAsStream("firebase-key.json");
 
         try {
-            Credentials credentials = GoogleCredentials.fromStream(credentialsStream);
+//            Credentials credentials = GoogleCredentials.fromStream(credentialsStream);
+            Credentials credentials = GoogleCredentials.fromStream(new FileInputStream("/etc/secrets/firebase-key.json"));
             Storage storage = StorageOptions.newBuilder().setCredentials(credentials).build().getService();
             Bucket bucket = storage.get(firebaseBucket);
 
@@ -150,8 +152,10 @@ public class FirebaseService {
         String fileName = parts[1].split("\\?")[0];
         fileName = fileName.replace("%2F", "/");
         BlobId blobId = BlobId.of(firebaseBucket, fileName);
-        InputStream credentialsStream = FirebaseService.class.getClassLoader().getResourceAsStream("firebase-key.json");
-        Credentials credentials = GoogleCredentials.fromStream(credentialsStream);
+//      InputStream credentialsStream = FirebaseService.class.getClassLoader().getResourceAsStream("firebase-key.json");
+//      Credentials credentials = GoogleCredentials.fromStream(credentialsStream);
+        Credentials credentials = GoogleCredentials.fromStream(new FileInputStream("/etc/secrets/firebase-key.json"));
+
         Storage storage = StorageOptions.newBuilder().setCredentials(credentials).build().getService();
         return storage.delete(blobId);
     }
