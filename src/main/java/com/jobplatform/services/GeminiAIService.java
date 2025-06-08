@@ -24,7 +24,7 @@ import java.util.NoSuchElementException;
 public class GeminiAIService {
 
     private final RestTemplate restTemplate;
-    @Value("${spring.gemini-api-key}")
+    @Value("${GOOGLE_API_KEY}")
     private String apiKey;
     private final CvRepository cvRepository;
     private final CvFileRepository cvFileRepository;

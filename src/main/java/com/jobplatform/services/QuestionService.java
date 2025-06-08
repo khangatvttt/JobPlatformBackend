@@ -19,7 +19,7 @@ public class QuestionService {
     private final QuestionMapper questionMapper;
 
     public List<Question> getAllQuestions() {
-        return questionRepository.findAll();
+        return questionRepository.findByStatus(true);
     }
 
     public Question getQuestionById(Long id) {
