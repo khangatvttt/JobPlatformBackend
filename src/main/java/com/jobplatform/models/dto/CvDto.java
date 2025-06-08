@@ -18,5 +18,6 @@ public record CvDto(
         String imageCV,
         String languageSkill,
         String hobby,
-        String portfolio
+        String portfolio,
+        Boolean status
 ) {}

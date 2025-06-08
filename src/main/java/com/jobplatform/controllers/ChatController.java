@@ -40,7 +40,7 @@ public class ChatController {
         chatMessageService.createMessage(message);
         String messageNoti = "Có tin nhắn mới từ " + userName;
         UserAccount userReceiver = userRepository.findByEmail(message.getReceiver()).orElseThrow(() -> new NoSuchElementException("User not found for notification"));
-        notificationService.addNotification(messageNoti, "" ,userReceiver);
+        notificationService.addNotification(messageNoti, "/tin-nhan" ,userReceiver);
         firebaseService.sendNotification(userReceiver.getId(), messageNoti);
         messagingTemplate.convertAndSendToUser(
                 message.getReceiver(), "/queue/messages", message);
