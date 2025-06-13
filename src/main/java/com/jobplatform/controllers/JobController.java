@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.naming.NoPermissionException;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/jobs")
@@ -63,6 +64,11 @@ public class JobController {
     public ResponseEntity<JobDetailDto> findJobById(@PathVariable Long id) {
         JobDetailDto job = jobService.findJobById(id);
         return new ResponseEntity<>(job, HttpStatus.OK);
+    }
+
+    @GetMapping("/checkApplied")
+    public ResponseEntity<Boolean> checkApplied(@RequestBody Map<String, Long> payloads) {
+        return new ResponseEntity<>(jobService.checkJobApplied(payloads.get("userId"), payloads.get("jobId")), HttpStatus.OK);
     }
 
     @PatchMapping("/{id}")

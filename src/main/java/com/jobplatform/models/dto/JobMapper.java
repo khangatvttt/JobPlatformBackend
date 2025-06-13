@@ -18,6 +18,8 @@ public interface JobMapper {
     })
     JobDetailDto toDto(Job job);
 
+    JobDetailDto toDtoWithApplied(Job job, boolean isApplied);
+
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateJob(UpdateJobDto sourceJob, @MappingTarget Job targetJob);
 

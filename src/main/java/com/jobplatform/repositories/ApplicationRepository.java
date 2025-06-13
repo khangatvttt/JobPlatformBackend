@@ -2,6 +2,7 @@ package com.jobplatform.repositories;
 
 import com.jobplatform.models.Application;
 import com.jobplatform.models.Job;
+import com.jobplatform.models.UserAccount;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -28,5 +29,7 @@ public interface ApplicationRepository extends JpaRepository<Application, Long>,
     List<Object[]> countApplicationsByStatus(
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate);
+
+    List<Application> findByUserAndJob(UserAccount user, Job job);
 
 }

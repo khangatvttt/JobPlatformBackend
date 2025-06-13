@@ -10,6 +10,7 @@ import com.jobplatform.repositories.JobRepository;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
 import lombok.SneakyThrows;
+import org.apache.coyote.BadRequestException;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -57,6 +58,10 @@ public class ApplicationService {
             if (!cvs.contains(cv)) {
                 throw new NoPermissionException();
             }
+        }
+
+        if (checkApplied(userAccount, job)) {
+            throw new BadRequestException("You've already applied to this job");
         }
 
         Application application = applicationMapper.toEntity(applicationDto);
@@ -173,5 +178,8 @@ public class ApplicationService {
         };
     }
 
-
+    public boolean checkApplied(UserAccount user, Job job) {
+        List<Application> applicationList = applicationRepository.findByUserAndJob(user, job);
+        return !applicationList.isEmpty();
+    }
 }

@@ -37,14 +37,16 @@ public class JobService {
     private final NotificationService notificationService;
     private final FirebaseService firebaseService;
     private final CvRepository cvRepository;
+    private final ApplicationService applicationService;
 
-    public JobService(JobRepository jobRepository, UserRepository userRepository, JobMapper jobMapper, NotificationService notificationService, FirebaseService firebaseService, CvRepository cvRepository) {
+    public JobService(JobRepository jobRepository, UserRepository userRepository, JobMapper jobMapper, NotificationService notificationService, FirebaseService firebaseService, CvRepository cvRepository, ApplicationService applicationService) {
         this.jobRepository = jobRepository;
         this.userRepository = userRepository;
         this.jobMapper = jobMapper;
         this.notificationService = notificationService;
         this.firebaseService = firebaseService;
         this.cvRepository = cvRepository;
+        this.applicationService = applicationService;
     }
 
     // Create a new job
@@ -242,6 +244,12 @@ public class JobService {
         if (userAccount.getRole()!= UserAccount.Role.ROLE_ADMIN && !userAccount.getId().equals(resourceOwnerId)){
             throw new NoPermissionException();
         }
+    }
+
+    public boolean checkJobApplied(Long userId, Long jobId){
+        UserAccount userAccount = userRepository.findById(userId).orElseThrow(()->  new NoSuchElementException("User not found"));
+        Job job = jobRepository.findById(jobId).orElseThrow(() -> new NoSuchElementException("Job not found"));
+        return applicationService.checkApplied(userAccount, job);
     }
 
 }
